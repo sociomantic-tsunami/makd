@@ -1,0 +1,267 @@
+#!/usr/bin/env python3
+
+import os
+import re
+import sys
+import pprint
+import argparse
+import subprocess
+
+
+# Output levels according to user selected verbosity
+DEBUG = 3
+INFO  = 2
+WARN  = 1
+ERR   = 0
+
+
+def main():
+    parser, args = parse_args()
+
+    # Set verbose level
+    global verbose
+    verbose = args.verbose - args.quiet
+
+    # Convert VAR=VAL strings to a dict
+    default_vars = dict((v.split('=', 1) for v in args.vars))
+
+    pkg = Package(args, default_vars)
+    debugf('Initial package definition: {}', pkg)
+
+    infof("Reading file {}", args.pkg_file)
+    pkg.load(args.pkg_file)
+    debugf('\tPackage definition so far: {}', pkg)
+
+    debugf('Final package definition: {}', pkg)
+    debugf('FPM defaults:\n{}', pformat(args.defaults))
+    debugf('FPM overrides:\n{}', pformat(args.overrides))
+
+    fpm_args = pkg.to_fpm_args()
+    debugf('FPM package arguments:\n{}', pformat(fpm_args))
+
+    fpm_args = args.defaults + fpm_args + args.overrides
+    debugf('Final FPM arguments:\n{}', pformat(fpm_args))
+
+    cmd = [args.fpm_path] + fpm_args
+    cmd_str = ' '.join(('"{}"'.format(a) for a in cmd))
+
+    if args.dry_run:
+        infof("Not running (dry-run): {}", cmd_str)
+        return 0
+
+    infof("Running: {}", cmd_str)
+    return subprocess.call(cmd)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Make packages using fpm '
+            'based on package definition files')
+    parser.add_argument('-v', '--verbose', action='count', default=WARN,
+            help="be more verbose (can be specified multiple times to get "
+            "extra verbosity)")
+    parser.add_argument('-q', '--quiet', action='count', default=0,
+            help="be less verbose (can be specified multiple times to get "
+            "less verbosity)")
+    parser.add_argument('-n', '--dry-run', action='store_true',
+            help="Don't run fpm (usually better used with -v)")
+    parser.add_argument('-F', '--fpm-path', default='fpm', metavar='PATH',
+            help="use PATH as the path to the fpm binary instead of "
+            "%(default)s")
+    parser.add_argument('--ldd-path', default='ldd', metavar='PATH',
+            help="use PATH as the path to the ldd binary instead of "
+            "%(default)s")
+    parser.add_argument('--dpkg-path', default='dpkg', metavar='PATH',
+            help="use PATH as the path to the dpkg binary instead of "
+            "%(default)s")
+    parser.add_argument('-d', '--define', dest='vars',
+            action='append', default=[], metavar='VAR=VAL',
+            help="Define a variable VAR with value VAL")
+    parser.add_argument('-D', '--default', dest='defaults',
+            action='append', default=[], metavar='FPMARG',
+            help="Set a default argument to be passed to FPM")
+    parser.add_argument('-O', '--override', dest='overrides',
+            action='append', default=[], metavar='FPMARG',
+            help="Set an FPM argument to override values in config files")
+    parser.add_argument('pkg_file',
+            help="package files to build")
+    args = parser.parse_args()
+
+    return parser, args
+
+
+class Functions:
+
+    # lines: "\t<name> => <path> (<address>)"
+    #        "\t<name> => not found"
+    ldd_re = re.compile(r'^\s+(\S+) => (.*?)(?: \(.*\))?$', re.MULTILINE)
+
+    # lines: "<package>:<arch>: <file>"
+    dpkg_re = re.compile(r'^([^:]+)(?::[^:]+)?: .*$', re.MULTILINE)
+
+    autodeps_exclusions = frozenset(r'''
+            linux-vdso.so.1
+        '''.split())
+
+    def __init__(self, args, pkg):
+        self.args = args
+        self.pkg = pkg
+
+    def _parse_cmd(self, cmd, *args):
+        args1 = cmd.split()
+        cmd = args1.pop(0)
+        regex = getattr(self, cmd + '_re')
+        cmd = [getattr(self.args, cmd + '_path')]
+        cmd.extend(args1)
+        cmd.extend(args)
+        debugf("Running command: {}", cmd)
+        output = subprocess.check_output(cmd).decode(sys.stdin.encoding)
+        debugf("Output: {}", output)
+        return regex.findall(output)
+
+    def autodeps(self, fname):
+        # XXX: Only debian packages supported for now
+        deps = set()
+        for lib, path in self._parse_cmd('ldd', fname):
+            if lib in self.autodeps_exclusions:
+                debugf("`{}` is in autodeps_exclusions, skipping...", lib)
+                continue
+            if path == '' or path == 'not found':
+                warnf("`ldd` returned '{}' for library `{}`, skipping "
+                        "automatic dependency calculation for it...", path, lib)
+                continue
+            try:
+                deps.add(self._parse_cmd('dpkg', '-S', path)[0])
+            except subprocess.SubprocessError as e:
+                warnf("Error looking up library `{}` (`{}`) via `dpkg`, "
+                        "skipping automatic dependency calculation for it: {}",
+                        lib, path, e)
+                continue
+        return sorted(deps)
+
+
+class Package:
+
+    def __init__(self, args, vars):
+        self.vars = vars
+        self.functions = Functions(args, self)
+        self.options = dict()
+        self.args = dict()
+
+    def to_fpm_args(self):
+        args = []
+        for k, v in self.options.items():
+            k = k.replace('_', '-')
+            if len(k) == 1:
+                fmt = '-{}{}'
+            else:
+                fmt = '--{}={}'
+            if not isinstance(v, list):
+                v = [v]
+            for i in v:
+                args.append(fmt.format(k, i))
+        args.extend(self.args)
+        return args
+
+    def load(self, fname):
+        import runpy
+        global __builtins__
+        __builtins__.VAR = AttrDict(self.vars)
+        __builtins__.FUN = self.functions
+        sys.path.insert(0, os.path.dirname(fname))
+
+        try:
+            pkg = runpy.run_path(fname, None, 'pkg')
+        except IOError as e:
+            die("can't read package definition file '{}': {}", fname, e)
+        except Exception as e:
+            die("can't load package definition file '{}'", fname, _tb=True,
+                    _remove_tb=4)
+        finally:
+            sys.path.pop(0)
+            del __builtins__.VAR
+            del __builtins__.FUN
+
+        def checked_get(name, type):
+            if name not in pkg:
+                die("{}: no '{}' definition found in file", fname, name)
+            if not isinstance(pkg[name], type):
+                die("{}: '{}' definition is not a '{}'", fname, name,
+                        type.__name__)
+            return pkg[name]
+
+        self.options = checked_get('OPTS', dict)
+        self.args = checked_get('ARGS', list)
+
+        # Simple heuristic to detect if ARGS = list("something") was used
+        for i in self.args:
+            if len(str(i)) != 1:
+                break
+        else:
+            warnf('Your ARGS list looks weird, maybe you mistakenly used '
+                    'ARGS=list("string")? If so, please use ARGS=["string"] '
+                    'instead.\n\tARGS = {!r}', self.args)
+
+    def __str__(self):
+        return 'Package(\nvars={}\noptions={}\nargs={})'.format(
+                pformat(self.vars), pformat(self.options), pformat(self.args))
+
+
+class AttrDict(dict):
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+
+
+def pformat(obj):
+    return pprint.pformat(obj, indent=4)
+
+def debugf(fmt='', *args, **kwargs):
+    if verbose < DEBUG:
+        return
+    sys.stdout.write(fmt.format(*args, **kwargs) + '\n')
+
+def infof(fmt='', *args, **kwargs):
+    if verbose < INFO:
+        return
+    sys.stdout.write(fmt.format(*args, **kwargs) + '\n')
+
+def warnf(fmt='', *args, **kwargs):
+    if verbose < WARN:
+        return
+    msg = ''
+    if sys.stderr.isatty():
+        msg += '\033[33m'
+    msg += 'Warning: ' + fmt.format(*args, **kwargs)
+    if sys.stderr.isatty():
+        msg += '\033[0m'
+    sys.stderr.write(msg + '\n')
+    sys.stderr.flush()
+
+def errf(fmt='', *args, **kwargs):
+    if verbose < ERR:
+        return
+    msg = ''
+    if sys.stderr.isatty():
+        msg += '\033[31m'
+    msg += 'Error: ' + fmt.format(*args, **kwargs)
+    if sys.stderr.isatty():
+        msg += '\033[0m'
+    sys.stderr.write(msg + '\n')
+    sys.stderr.flush()
+
+def die(fmt='', *args, **kwargs):
+    errf(fmt, *args, **kwargs)
+
+    if kwargs.get('_tb', False):
+        sys.stderr.write("\n")
+        from traceback import print_exception
+        (exc_type, exc_value, exc_tb) = sys.exc_info()
+        for i in range(kwargs.get('_remove_tb', 0)):
+            exc_tb = exc_tb.tb_next
+        print_exception(exc_type, exc_value, exc_tb)
+
+    sys.exit(1)
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+

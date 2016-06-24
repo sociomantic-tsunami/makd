@@ -1,0 +1,196 @@
+#!/usr/bin/env python3
+
+# Copyright 2014-2016 Sociomantic Labs GmbH.
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+import sys
+import locale
+from datetime import datetime
+from subprocess import CalledProcessError, PIPE
+
+
+ENC = locale.getpreferredencoding()
+
+
+def main():
+    parser, args = parse_args()
+
+    for i, obj in enumerate(get_log(args.git_log_args)):
+        if i == 0:
+            if isinstance(obj, Commit):
+                tag = Tag(obj.hash, args.initial_version, get_git_author(),
+                        datetime.now())
+            else:
+                tag = obj
+            if args.initial_version:
+                tag.name = args.initial_version
+            if tag.name is None:
+                parser.error('{}: no tag for the last commit, you must '
+                        'specify an initial version (--initial-version)')
+
+        if isinstance(obj, Tag):
+            if i > 0:
+                print()
+                print(' -- {}  {}'.format(obj.author, obj.date.isoformat()))
+                print()
+
+            print('{} ({}) {}; urgency={}'.format(args.pkg_name, obj.name,
+                    args.dist_name, args.urgency))
+            print()
+        else:
+            print('  * {} ({})'.format(obj.message, obj.hash[:7]))
+
+
+def run(*args, **kwargs):
+    from subprocess import check_output
+    return check_output(*args, **kwargs).strip().decode(ENC)
+
+
+def get_dist():
+    return run('lsb_release -cs'.split())
+
+
+def get_git_author():
+    try:
+        name = run('git config user.name'.split())
+    except CalledProcessError as e:
+        warn("can't get author name from `git config user.name` ({}): ", e)
+        name = 'Unknown'
+    try:
+        email = run('git config user.email'.split())
+    except CalledProcessError as e:
+        warn("can't get author e-mail from `git config user.email` ({})", e)
+        email = 'unknown@example.com'
+    return '{} <{}>'.format(name, email)
+
+
+class Tag:
+    def __init__(self, hash, name, author, date):
+        self.hash = hash
+        self.name = name
+        self.author = author
+        self.date = date
+    def __str__(self):
+        return self.name
+
+
+class Commit:
+    def __init__(self, hash, message):
+        self.hash = hash
+        self.message = message
+    def __str__(self):
+        return self.message
+
+
+def get_log(opts=()):
+    from subprocess import Popen
+
+    cmd = ('git', 'log') + tuple(opts) + ('--format=%h%x1f%D%x1f%s%x1e',)
+    dbg('running command: {}', cmd)
+    p = Popen(cmd, stdout=PIPE)
+
+    log = []
+    row = ''
+    for l in p.stdout.readlines():
+        l = l.decode(ENC)
+        # accumulate if the end of record is not found
+        if not l.endswith('\x1e\n'):
+            row += l
+            continue
+        # full record read
+        row += l[:-2] # remove record and line terminator
+        hash, refs, message = row.split("\x1f")
+        tag = get_tag(refs)
+        if tag is not None:
+            log.append(tag)
+        log.append(Commit(hash, message))
+        row = ''
+
+    status = p.wait()
+    assert status == 0
+
+    return log
+
+
+def get_tag(refs):
+    import re
+    from datetime import timezone, timedelta
+
+    tag_re = re.compile(r'(?:^|, )tag: (?P<tag>.*?)(?:,|$)')
+    tag = None
+    tags = set(tag_re.findall(refs))
+    for t in set(tags):
+        try:
+            ti = run('git cat-file tag'.split() + [t], stderr=PIPE)
+            if tag is None:
+                tag = t
+                tag_info = ti.splitlines()
+        except CalledProcessError as e:
+            warn("not using tag {} because is not annotated", t)
+            tags.remove(t)
+    if not tags:
+        return None
+    if len(tags) > 1:
+        warn('more than one tag found for commit {}, using the first '
+                'one ({})', hash, ', '.join(tags))
+    def get_field(field):
+        hdr = field + ' '
+        r = [l for l in tag_info if l.startswith(hdr)]
+        return [l for l in tag_info if l.startswith(hdr)][0][len(hdr):]
+    hash = get_field('object')
+    author, timestamp, offset = get_field('tagger').rsplit(' ', 2)
+    tz = timezone(timedelta(minutes=int(offset[0]+'1') * (
+            int(offset[1:2])*60 + int(offset[3:4]))))
+    date = datetime.fromtimestamp(int(timestamp), tz)
+    return Tag(hash, tag, author, date)
+
+
+def parse_args():
+    from argparse import ArgumentParser, REMAINDER
+
+    parser = ArgumentParser(description='Formats git log as a Debian changelog')
+    parser.add_argument('-v', '--verbose', action='count', default=1,
+            help="be more verbose (can be specified multiple times to get "
+            "extra verbosity)")
+    parser.add_argument('-i', '--initial-version',
+            help="specifies an initial version (by default the tag of the last "
+            "commit is used if present)")
+    parser.add_argument('-d', '--dist-name', default=get_dist(),
+            help="specifies the distribution name (by default obtained from "
+            "lsb_release")
+    parser.add_argument('-u', '--urgency', default='medium',
+            choices='low medium high emergency critical'.split(),
+            help="specifies the distribution name (by default obtained from "
+            "lsb_release")
+    parser.add_argument('pkg_name', help="package name")
+    parser.add_argument('git_log_args', nargs=REMAINDER,
+            help="extra arguments to be passed to git log")
+    args = parser.parse_args()
+
+    global VERBOSE
+    VERBOSE = args.verbose
+
+    return parser, args
+
+
+def dbg(fmt, *args, **kwargs):
+    if VERBOSE > 1:
+        sys.stderr.write(('{}: debug: ' + fmt).format(
+                sys.argv[0], *args, **kwargs) + '\n')
+
+
+def warn(fmt, *args, **kwargs):
+    if VERBOSE > 0:
+        sys.stderr.write(('{}: warning: ' + fmt).format(
+                sys.argv[0], *args, **kwargs) + '\n')
+
+
+def err(fmt, *args, **kwargs):
+    sys.stderr.write(('{}: error: ' + fmt).format(
+            sys.argv[0], *args, **kwargs) + '\n')
+
+
+if __name__ == '__main__':
+    main()
+
