@@ -568,7 +568,7 @@ These files are expected to be Python scripts defining two variables:
         list of files to include in the package).
 
 An extra built-in variable will be available, ``VAR``, containing variables
-passed to the ``mkpkg`` util. By default Makd pass the following variables::
+passed to the ``mkpkg`` util. By default Makd pass the following variables:
 
 ``name``
         name of the package as calculated from the ``.pkg`` file, including the
