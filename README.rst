@@ -688,10 +688,10 @@ For convenience, here is a simple example:
             'libnew' if VAR.lsb_release == 'trusty' else 'libold' ],
         )
 
-        ARGS = list(
+        ARGS = [
           bin_path + '=/usr/sbin/' + bin_name + VAR.suffix,
           'README.rst=/usr/share/doc/' + pkg_name '/',
-        )
+        ]
 
 ``$P/test2.pkg``:
 
@@ -721,10 +721,10 @@ For convenience, here is a simple example:
           depends = FUN.autodeps(bin_path),
         )
 
-        ARGS = list(
+        ARGS = [
           bin_path + '=/usr/bin/' + bin_name + VAR.suffix,
           'util.conf=/etc/',
-        )
+        ]
 
 Suppose that the targets ``daemon`` and ``util`` build the binaries ``daemon``
 and ``util`` respectively, then you probably want to make sure you build those
