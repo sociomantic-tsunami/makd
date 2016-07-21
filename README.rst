@@ -304,6 +304,11 @@ differently in D1 and D2, for example:
         rule: d2_file.d
         endif
 
+To make project always use D2 compiler, simply define this variable in
+``Config.mak``:
+
+        DVER:=2
+
 Variables you might want to override
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * The special target variables ``all``, ``test``, ``doc``.

@@ -95,7 +95,7 @@ COLOR_OUT ?= $(COLOR_ERR)
 # To compile the D2 version, you can use make DVER=2
 # FIXME_IN_D2: This is only present as a transitional solution, it should be
 # removed after the D2 migration is done
-DVER := 1
+DVER ?= 1
 export MAKD_DVER := $(DVER)
 
 # Default D compiler (tries first with dmd1 and uses dmd if not present)
