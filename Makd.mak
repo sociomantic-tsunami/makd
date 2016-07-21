@@ -463,15 +463,24 @@ $O/allunittests.d: $(UNITTEST_FILES)
 # 1. find any module named UnitTestRunner
 # 2. get the relative file path from `src` folder
 # 3. replace slashes with dots to get qualified module name
-TEST_RUNNER_MODULE=$(shell \
+TEST_RUNNER_MODULE?=$(shell \
 	  find ./ -path */src/*/core/UnitTestRunner.d \
 	| sed -n 's|^.\+/src/\(.\+/UnitTestRunner\).d$$|\1|p' \
 	| tr / .)
 
+# if no UnitTestRunner module is found and it was not overriden
+# from command line or Config.mak, use default D test runner
+# as a fallback
+ifeq ($(TEST_RUNNER_MODULE),)
+TEST_RUNNER_STRING=void main() {}
+else
+TEST_RUNNER_STRING=import $(TEST_RUNNER_MODULE);
+endif
+
 # General rule to build the unittest program using the UnitTestRunner
 $O/%unittests.d: $G/build-d-flags
 	$(call exec,printf 'module $(patsubst $O/%.d,%,$@);\n\
-		import $(TEST_RUNNER_MODULE); \
+		$(TEST_RUNNER_STRING)\n\
 		\n$(foreach f,$(filter %.d,$^),\
 		import $(subst /,.,$(patsubst $C/$(SRC)/%.d,%,$f));\n)' > \
 			$@,,gen)
