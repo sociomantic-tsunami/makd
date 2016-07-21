@@ -596,16 +596,17 @@ These files are expected to be Python scripts defining two variables:
         a fpm_ command-line option. If the key is only one character (for
         example ``c``), it will be passed as ``-<key><value>`` and if it's
         more, it will be passed as ``--<key>=<value>`` (``_`` characters in the
-        key will be replaced by ``-`` for convenience). No validation is
-        performed over the keys or values, they are just passed blindly to
-        fpm_.
+        key will be replaced by ``-`` for convenience). The ``<value>`` can be a
+        string or an array of strings. In the latter case, the key is used as fpm_
+        flag for each item in ``<value>``. No validation is performed over the
+        keys or values, they are just passed blindly to fpm_.
 
 ``ARGS``
         a ``list()`` (array) to pass to fpm_ as positional arguments (usually the
         list of files to include in the package).
 
 An extra built-in variable will be available, ``VAR``, containing variables
-passed to the ``mkpkg`` util. By default Makd pass the following variables::
+passed to the ``mkpkg`` util. By default Makd pass the following variables:
 
 ``name``
         name of the package as calculated from the ``.pkg`` file, including the
@@ -723,12 +724,13 @@ For convenience, here is a simple example:
 
           depends = FUN.autodeps(bin_path) + [ 'bash',
             'libnew' if VAR.lsb_release == 'trusty' else 'libold' ],
+
         )
 
-        ARGS = list(
+        ARGS = [
           bin_path + '=/usr/sbin/' + bin_name + VAR.suffix,
           'README.rst=/usr/share/doc/' + pkg_name '/',
-        )
+        ]
 
 ``$P/test2.pkg``:
 
@@ -755,13 +757,15 @@ For convenience, here is a simple example:
 
           category = 'net',
 
+          config_files = [ '/etc/util.conf', '/etc/anoter.conf' ],
+
           depends = FUN.autodeps(bin_path),
         )
 
-        ARGS = list(
+        ARGS = [
           bin_path + '=/usr/bin/' + bin_name + VAR.suffix,
           'util.conf=/etc/',
-        )
+        ]
 
 Suppose that the targets ``daemon`` and ``util`` build the binaries ``daemon``
 and ``util`` respectively, then you probably want to make sure you build those
