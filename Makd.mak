@@ -461,13 +461,14 @@ UNITTEST_FILES += $(call find_files,.d,,$C/$(SRC),$(TEST_FILTER_OUT))
 $O/fastunittests.d: $(filter-out %_slowtest.d,$(UNITTEST_FILES))
 $O/allunittests.d: $(UNITTEST_FILES)
 
-# 1. find any module named UnitTestRunner
-# 2. get the relative file path from `src` folder
-# 3. replace slashes with dots to get qualified module name
-TEST_RUNNER_MODULE?=$(shell \
-	  find ./ -path */src/*/core/UnitTestRunner.d \
-	| sed -n 's|^.\+/src/\(.\+/UnitTestRunner\).d$$|\1|p' \
-	| tr / .)
+# Test runner module. Uses ocean if available
+TEST_RUNNER_MODULE ?= $(shell \
+	for sub in ${SUBMODULES}; do \
+		if test "$$(basename $$sub)" = "ocean"; then \
+			echo ocean.core.UnitTestRunner; \
+			break; \
+		fi; \
+	done)
 
 # if no UnitTestRunner module is found and it was not overriden
 # from command line or Config.mak, use default D test runner
