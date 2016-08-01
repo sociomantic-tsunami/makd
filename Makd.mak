@@ -423,7 +423,8 @@ pkg: $(patsubst $(PKG)/%.pkg,$O/pkg-%.stamp,$(wildcard $(PKG)/*.pkg))
 # is a different file)
 $O/pkg-%.stamp: $(PKG)/%.pkg
 	$(PKG_PREBUILD)
-	$(call exec,$(MAKD_PATH)/mkpkg $(if $V,,-vv) -D-p"$P" -F "$(FPM)" \
+	$(call exec,PYTHONDONTWRITEBYTECODE=1 $(MAKD_PATH)/mkpkg \
+		$(if $V,,-vv) -D-p"$P" -F "$(FPM)" \
 		$(PKG_DEFAULTS) \
 		-d suffix="$(PKG_SUFFIX)" -d version="$(PKGVERSION)" \
 		-d builddir="$G" -d bindir="$B" -d name="$*$(PKG_SUFFIX)" \
