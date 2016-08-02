@@ -95,7 +95,7 @@ COLOR_OUT ?= $(COLOR_ERR)
 # To compile the D2 version, you can use make DVER=2
 # FIXME_IN_D2: This is only present as a transitional solution, it should be
 # removed after the D2 migration is done
-DVER := 1
+DVER ?= 1
 export MAKD_DVER := $(DVER)
 
 # Default D compiler (tries first with dmd1 and uses dmd if not present)
@@ -461,18 +461,28 @@ UNITTEST_FILES += $(call find_files,.d,,$C/$(SRC),$(TEST_FILTER_OUT))
 $O/fastunittests.d: $(filter-out %_slowtest.d,$(UNITTEST_FILES))
 $O/allunittests.d: $(UNITTEST_FILES)
 
-# 1. find any module named UnitTestRunner
-# 2. get the relative file path from `src` folder
-# 3. replace slashes with dots to get qualified module name
+# Test runner module. Uses ocean if available
 TEST_RUNNER_MODULE=$(shell \
-	  find ./ -path */src/*/core/UnitTestRunner.d \
-	| sed -n 's|^.\+/src/\(.\+/UnitTestRunner\).d$$|\1|p' \
-	| tr / .)
+	for sub in ${SUBMODULES}; do \
+		if test "$$(basename $$sub)" = "ocean"; then \
+			echo ocean.core.UnitTestRunner; \
+			exit 0; \
+		fi \
+	done)
+
+# if no UnitTestRunner module is found and it was not overriden
+# from command line or Config.mak, use default D test runner
+# as a fallback
+ifeq ($(TEST_RUNNER_MODULE),)
+TEST_RUNNER_STRING=void main() {}
+else
+TEST_RUNNER_STRING=import $(TEST_RUNNER_MODULE);
+endif
 
 # General rule to build the unittest program using the UnitTestRunner
 $O/%unittests.d: $G/build-d-flags
 	$(call exec,printf 'module $(patsubst $O/%.d,%,$@);\n\
-		import $(TEST_RUNNER_MODULE); \
+		$(TEST_RUNNER_STRING)\n\
 		\n$(foreach f,$(filter %.d,$^),\
 		import $(subst /,.,$(patsubst $C/$(SRC)/%.d,%,$f));\n)' > \
 			$@,,gen)

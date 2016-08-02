@@ -31,7 +31,9 @@ Top-level Makefile
 To get started you need to have makd as a submodule (or copy it to your project)
 and create a top-level makefile for your project (or convert the old one).
 
-A typical Top-level ``Makefile`` should look like this::
+A typical Top-level ``Makefile`` should look like this:
+
+.. code:: make
 
         # Include the top-level makefile
         include submodules/makd/Makd.mak
@@ -43,7 +45,9 @@ it, which will be explained later.
 You can change this default target by explicitly overriding the
 ``.DEFAULT_GOAL`` variable, which tells GNU Make which target should be built
 when you just run ``make`` without arguments. If you set it, make sure you
-define it **after** including ``Makd.mak``, order is important in this case::
+define it **after** including ``Makd.mak``, order is important in this case:
+
+.. code:: make
 
         # Default goal for building this directory
         .DEFAULT_GOAL := some-target
@@ -60,7 +64,9 @@ Build.mak
 ---------
 This is the file where you define what your ``Makefile`` will actually do. Makd
 does a lot for you, so this file is usually very terse. To define a binary to
-compile, all you need to write in your ``Build.mak`` is this::
+compile, all you need to write in your ``Build.mak`` is this:
+
+.. code:: make
 
         $B/someapp: $C/src/main/someapp.d
 
@@ -75,7 +81,9 @@ different locations (to make this work you should refer to all the project
 files using this ``$C/`` *prefix* when you refer to the current directory of
 your ``Build.mak``).
 
-Usually you want a shortcut to type less, so you might want to add::
+Usually you want a shortcut to type less, so you might want to add:
+
+.. code:: make
 
         .PHONY: someapp
         someapp: $B/someapp
@@ -84,13 +92,17 @@ Now you can simply write ``make someapp`` to build it. Simple.
 
 But maybe you want to type just ``make``. Since the ``.DEFAULT_GOAL`` defined in
 your ``Makefile`` is ``all``, you can use the special ``all`` variable to add
-targets to build when is called::
+targets to build when is called:
+
+.. code:: make
 
         all += someapp
 
 Now you can simply write ``make`` and you'll get your program built.
 
-Putting it all together, your file should look like::
+Putting it all together, your file should look like:
+
+.. code:: make
 
         .PHONY: someapp
         someapp: $B/someapp
@@ -284,11 +296,18 @@ the special variable ``DVER``. For example::
         make DVER=2 test
 
 Inside your ``Build.mak`` you can also use this to build your project
-differently in D1 and D2, for example::
+differently in D1 and D2, for example:
+
+.. code:: make
 
         ifeq ($(DVER),2)
         rule: d2_file.d
         endif
+
+To make project always use D2 compiler, simply define this variable in
+``Config.mak``:
+
+        DVER:=2
 
 Variables you might want to override
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -388,7 +407,9 @@ exec
 Probably the most important is ``exec``. This function takes care of the pretty
 output and verboseness. Each time you write a custom rule (hopefully you won't
 need to do this often), you should probably use it. Here is the function
-*signature*::
+*signature*:
+
+.. code:: make
 
         $(call exec,command[,pretty_target[,pretty_command]])
 
@@ -397,7 +418,9 @@ be printed as the target that's being build (by default is ``$@``, i.e. the
 actual target being built), and ``pretty_command`` is the string that will be
 print as the command (by default the first word in ``command``).
 
-Here is an example rule::
+Here is an example rule:
+
+.. code:: make
 
         touch-file:
                 $(call exec,touch -m $@)
@@ -433,14 +456,18 @@ installed. The *signature* is::
 ``compare_op`` is the comparison operator it should be used by the check (by
 default is >=, but it can be any of <,<=,=,>=,>).
 
-You can use this as the first command to run for a target action, for example::
+You can use this as the first command to run for a target action, for example:
+
+.. code:: make
 
         myprogram: some-source.d
         	$(call check_deb,dstep,0.0.1)
         	rdmd --build --whatever.
 
 If you need to share it for multiple targets you can just make a simple alias
-with a lazy variable::
+with a lazy variable:
+
+.. code:: make
 
         check_dstep = $(call check_deb,dstep,0.0.1)
 
@@ -455,7 +482,9 @@ closer to a function than a variable. When we are in verbose mode, ``V`` is
 empty and when we are not in verbose mode is set to ``@``. The effect is you
 only get some Make output if we are not in verbose mode.
 
-For example, this::
+For example, this:
+
+.. code:: make
 
         test:
                 $Vecho test
@@ -487,7 +516,9 @@ doesn't get destroyed by a ``make clean``.
 
 To change variables based on the flavor (or define new flavors), usually the
 `Config.mak`_ is the place, and you can use normal Make constructs, for
-example::
+example:
+
+.. code:: make
 
         ifeq ($F,devel)
         override DFLAGS += -debug=ProjectDebug
@@ -506,7 +537,9 @@ to make, for example::
         make F=production
 
 If you need to define more flavors, you can do so by defining the
-``$(VALID_FLAVORS)`` variable in your ``Config.mak``, for example::
+``$(VALID_FLAVORS)`` variable in your ``Config.mak``, for example:
+
+.. code:: make
 
         VALID_FLAVORS := devel production profiling
 
@@ -518,7 +551,9 @@ variables for a particular target, and usually that's the best way to pass
 specific variables to a particular target.
 
 For example, you need to link one binary to a particular library but not the
-others, then just do::
+others, then just do:
+
+.. code:: make
 
         $B/prog-with-lib: override LDFLAGS += -lthelib
         $B/prog-with-lib: $C/src/progwithlibs.d
@@ -531,7 +566,9 @@ variable override is propagated, so if your target needs to build a prerequisite
 first, the building of the prerequisite will also see the modified variable. If
 you want to avoid this, Makd also expands the special variable
 ``$($@.EXTRA_FLAGS)``. That is ``$(<name of the target>.EXTRA_FLAGS)`` (yes,
-Make support recursive expansion of variables :D), for example::
+Make support recursive expansion of variables :D), for example:
+
+.. code:: make
 
         $B/prog-with-lib.EXTRA_FLAGS := -lthelib
         $B/prog: $C/src/prog.d
@@ -733,7 +770,9 @@ For convenience, here is a simple example:
 Suppose that the targets ``daemon`` and ``util`` build the binaries ``daemon``
 and ``util`` respectively, then you probably want to make sure you build those
 before making the package, so in the ``Build.mak`` file you should put
-something like::
+something like:
+
+.. code:: make
 
         $O/pkg-daemon.stamp: daemon
 
@@ -757,7 +796,9 @@ All the tests are built using these extra options::
 
 If you have a test script, you can easily add the target to run that script to
 ``$(test)`` too (or ``$(fasttest))`` and ``$(test)`` if it's really fast).
-For example::
+For example:
+
+.. code:: make
 
         .PHONY: supertest
         supertest:
@@ -823,14 +864,18 @@ use ``+=``, there might be other predefined modules to skip.
 
 For `Unit tests`_, you just have to add the individual files you want to exclude
 from the tests. You can use a single ``%`` as a wildcard to exclude a whole
-package for example::
+package for example:
+
+.. code:: make
 
         TEST_FILTER_OUT += \
                 $C/src/brokenmodule.d \
                 $C/src/brokenpackage/%
 
 For `Integration tests`_, you can only skip a full test program, to do that just
-exclude the ``main.d`` for that program. For example::
+exclude the ``main.d`` for that program. For example:
+
+.. code:: make
 
         TEST_FILTER_OUT += $C/test/brokenprog/main.d
 
@@ -841,13 +886,17 @@ Some tests might need special flags for the unittest to compile, like when you
 need to link to external libraries.
 
 For `Unit tests`_ you can add unittest specific flags by using the following
-syntax::
+syntax:
+
+.. code:: make
 
         $O/%unittests: override LDFLAGS += -lglib-2.0
 
 This will link all the unittests to the glib-2.0 library, both ``fastunittest``
 and ``allunittest``. To apply flags to an individual test use a more specific
-target, for example::
+target, for example:
+
+.. code:: make
 
         $O/allunittests: override LDFLAGS += -lextra
 
@@ -869,7 +918,9 @@ used, the ``-k`` option will be passed to the unit test runner too, and if
 runner.
 
 For `Integration tests`_ the way to pass special flags is similar, but not the
-same. Use the following syntax::
+same. Use the following syntax:
+
+.. code:: make
 
         $O/test-feature: override LDFLAGS += -lglib-2.0
 
@@ -882,7 +933,9 @@ To pass flags to the test program execution, you can use the special variable
 test, the only way to do this for individual suites is to write it in the makefile,
 otherwise the same flags will be used to run **all** the integration tests.
 To run the *feature* integration test with the flag ``--verbose``, for example,
-you can do this (pay attention to the ``.stamp`` suffix, it is necessary)::
+you can do this (pay attention to the ``.stamp`` suffix, it is necessary):
+
+.. code:: make
 
         $O/test-feature.stamp: override ITFLAGS += --verbose
 
