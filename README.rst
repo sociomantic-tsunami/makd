@@ -251,8 +251,7 @@ Not all of them will be useful out of the box, you need to assign other targets
 to them to be useful. In this category are: ``all`` and ``doc``. For ``all`` we
 already saw how to feed it, just add targets to the predefined variable with
 the same name (``all += sometarget``). All those special target behaves the
-same. In a near future a built-in ``doc`` target will be provided, so you'll
-probably won't use that one for now.
+same.
 
 The built-in ``*unittest`` target will compile and run the unittests in every
 ``.d`` file found in the ``$(SRC)`` directory. The ``integrationtest`` target
@@ -273,6 +272,12 @@ work ;). If you can't do that (because you generated a source file for example),
 you can use the special variable ``clean`` too (``clean += src/trash.d
 src/garbage.d`` for example).
 
+The ``doc`` itarget will, by default, call `harbored-mod
+<https://github.com/kiith-sa/harbored-mod>`_ tool to generate the documentation
+for the project from DDOC comments inside source files.  Harbored-mod is
+choosen because it also allows Markdown syntax which makes the documentation
+easier to read in the source files, as it doesn't require as much DDOC macros
+as the dmd.
 
 Predefined variables
 --------------------
@@ -337,12 +342,16 @@ Variables you might want to override
   each ``*.pkg`` file in that directory will be built. By default ``$T/pkg``.
 * ``PKG_DEFAULTS`` contains the default options passed to ``mkpkg``.
 * ``PKG_PREBUILD`` hold commands to run previous to build packages.
+* ``PROJECT_NAME`` contains the name of the project, used in documentation
+  generatation. It defaults to the name of the top directory.
 * ``VERSION_FILE`` is the location where to write a D module storing detailed
   information on the Git version and build information (like person who did the
   build, date, etc.). If this file shouldn't be generated at all, you can set
   this variable to be empty. By default it ``$(GS)/Version.d``.
+* ``VERSION`` is the version to be used when creating documentation. It's
+  obtained via the ``mkversion.sh`` by default.
 * ``PKGVERSION`` is the version to be used when creating packages. It's
-  obtained via the ``mkversion.sh`` script by default.
+  obtained via the ``VERSION`` variable by default.
 * ``PRE_BUILD_D`` and ``POST_BUILD_D`` hold scripts executed before and after
   running the command to build D targets (when using the ``build_d`` function).
   By default they are used to generate the ``Version.d`` file, but users can

@@ -23,6 +23,9 @@ export MAKD_TOPDIR := $T
 # Name of the current directory, relative to $T
 R := $(subst $T,,$(patsubst $T/%,%,$(CURDIR)))
 
+# Project name defaults on the name of the top-dir
+PROJECT_NAME ?= $(shell basename $T)
+
 # Define the valid flavors
 VALID_FLAVORS := devel production
 
@@ -113,6 +116,12 @@ RDMD ?= rdmd
 D_GC ?= cdgc
 export D_GC
 
+# Default documentation generator tool to use (harbored-mod)
+HMOD ?= hmod
+
+# harbored-mod flags
+HMODFLAGS ?= --project-name $(PROJECT_NAME) --project-version $(VERSION)
+
 # Default fpm binary location
 FPM ?= fpm
 
@@ -201,6 +210,10 @@ C = $T$(if $S,/$S)
 # the helper script mkversion.sh and the module template Version.d.tpl.
 VERSION_FILE := $(GS)/Version.d
 
+# Generate a version description for the output binary. This calls `mkversion.sh`
+# script which will generate a version string.
+VERSION := $(shell $(MAKD_PATH)/mkversion.sh -p)
+
 # Generate a version description for the package
 # This translates between `git describe`-style version and Debian version.
 # First the `v` prefix and hash prefix `g` are removed and the `-` separator is
@@ -211,7 +224,7 @@ VERSION_FILE := $(GS)/Version.d
 # `-` in the dirty separator is also replaced with `~`. This is done for
 # improved Debian version comparison.
 # Example: v1.2.1-4-gea7105b-dirty -> 1.2.1+4~dirty.20160202160552~ea7105b
-PKGVERSION := $(shell $(MAKD_PATH)/mkversion.sh -p | \
+PKGVERSION := $(shell echo $(VERSION) | \
                 sed 's/^v\(.*\)/\1/' | \
                 sed 's/^\(.*\)-\([0-9]\+\)-g\([0-9a-f]\+\)/\1+\2~\3/' | \
                 sed 's/^\([^0-9]\)/0\1/' | \
@@ -536,6 +549,15 @@ $O/test-%.stamp: $O/test-%
 	$(call exec,$< $(ITFLAGS),$<,run)
 	$Vtouch $@
 
+# Documentation rules
+###################
+
+# General rule to run the harbored-mod generator
+$O/doc.stamp: $(shell find $(SRC) -type f \( -name '*.d' -o -name '*.di' \))
+	$(call exec,$(HMOD) -o $D $(HMODFLAGS) $(SRC) >/dev/null,doc)
+	$Vtouch $@
+
+doc += $O/doc.stamp
 
 # Create build directory structure
 ###################################
