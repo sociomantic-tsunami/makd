@@ -474,9 +474,9 @@ TEST_RUNNER_MODULE ?= $(shell \
 # from command line or Config.mak, use default D test runner
 # as a fallback
 ifeq ($(TEST_RUNNER_MODULE),)
-TEST_RUNNER_STRING=void main() {}
+TEST_RUNNER_STRING ?= void main() {}
 else
-TEST_RUNNER_STRING=import $(TEST_RUNNER_MODULE);
+TEST_RUNNER_STRING ?= import $(TEST_RUNNER_MODULE);
 endif
 
 # General rule to build the unittest program using the UnitTestRunner

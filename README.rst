@@ -326,6 +326,9 @@ Variables you might want to override
   ``FPMFLAGS``, but usually there are better methods to do that instead.
 * ``TEST_FILTER_OUT`` to exclude some files from the unit tests or integration
   tests.
+* ``TEST_RUNNER_MODULE`` and ``TEST_RUNNER_STRING`` are used to override the
+  module or string to inject in the unittest file that runs all the unit tests.
+  See Testing_ for details.
 * ``SRC`` is where all the source files of your project is expected to be. By
   default is ``src`` but you can override it with ``.`` if you keep the source
   file in the top-level. The path must be relative to the project's top-level
@@ -826,6 +829,23 @@ is automatically added to the ``$(test)`` special variable, so they will be run
 when using the ``test`` target too. On the other hand, the ``fastunittest``
 target will only run the fast unit tests, leaving the slow out, and is added to
 the ``fasttest`` target.
+
+Unit tests are compiled in a separate binary that imports all modules in the
+project. By default, this binary will just have an empty ``main()`` function
+and will let the D runtime to execute the tests by passing ``-unittest``.
+
+If `Ocean <https://github.com/sociomantic-tsunami/ocean>`_ is present as
+a submodule, then ``ocean.core.UnitTestRunner`` will be imported instead.
+
+If you want to import a custom module to run the unit tests, you can do so by
+specifying the module via the ``TEST_RUNNER_MODULE`` variable. If you do this,
+no ``main()`` function will be generated, so the module you are importing
+should define it.
+
+If you want to define a custom ``main()`` function, or put any other content
+into the file generated to run the unit tests (importing all modules), you can
+define ``TEST_RUNNER_MODULE`` as an empty variable and then put the contents
+you want to add to the file in the ``TEST_RUNNER_STRING`` variable.
 
 Integration tests
 ~~~~~~~~~~~~~~~~~
