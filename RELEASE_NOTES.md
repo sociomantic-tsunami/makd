@@ -4,9 +4,6 @@ Dependencies
 New Features
 ============
 
-* If `UnitTestRunner.d` module is neither found not explicitly
-  configured by developer, makd will resort to using default D test
-  runner instead.
+* Don't search for any `UnitTestRunner.d` file, just use the `UnitTestRunner`
+  Ocean's module if Ocean is configured as a submodule.
 
-* Now `DVER` variable is set only if it was not already defined,
-  allow to put it into `Config.makd` for D2-only projects.
