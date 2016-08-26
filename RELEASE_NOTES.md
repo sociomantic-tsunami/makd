@@ -1,6 +1,3 @@
-Dependencies
-============
-
 New Features
 ============
 
