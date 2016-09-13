@@ -643,11 +643,12 @@ passed to the ``mkpkg`` util. By default Makd pass the following variables:
 ``mkpkg`` also defines the following built-in functions in the special built-in
 variable ``FUN``:
 
-``autodeps(bin)``
+``autodeps(bin[, ...])``
         returns a sorted ``list()`` of packages ``bin`` depends on based on the
         outcome of running the ``ldd`` utility and searching to which packages
-        the libraries is linked belong to using ``dpkg``. This function is
-        tighly coupled to Debian packages for now.
+        the libraries is linked belong to using ``dpkg``. You can specify
+        multiple binaries to get a list of dependencies for all of them. This
+        function is tighly coupled to Debian packages for now.
 
 Generated packages will be stored in the ``$P`` directory (by default
 ``$G/pkg``. Since each package usually have a different name, as the version
