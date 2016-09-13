@@ -118,10 +118,11 @@ class Functions:
         debugf("Output: {}", output)
         return regex.findall(output)
 
-    def autodeps(self, fname):
+    def autodeps(self, *fnames):
         # XXX: Only debian packages supported for now
+        from itertools import chain
         deps = set()
-        for lib, path in self._parse_cmd('ldd', fname):
+        for lib, path in chain(*[self._parse_cmd('ldd', f) for f in fnames]):
             if lib in self.autodeps_exclusions:
                 debugf("`{}` is in autodeps_exclusions, skipping...", lib)
                 continue
