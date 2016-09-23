@@ -125,6 +125,12 @@ HMODFLAGS ?= --project-name $(PROJECT_NAME) --project-version $(VERSION)
 # Default fpm binary location
 FPM ?= fpm
 
+# Default dot binary location
+DOT ?= dot
+
+# Default flags to pass to graph-deps (see --help for details)
+GRAPH_DEPS_FLAGS ?= -c -C
+
 # Default fpm flags. By default it builds Debian packages from files, a Debian
 # changelog is provided, and a version and iteration (using the Debian version)
 # (defined lazily so we can use target variables)
@@ -558,6 +564,21 @@ $O/doc.stamp: $(shell find $(SRC) -type f \( -name '*.d' -o -name '*.di' \))
 	$Vtouch $@
 
 doc += $O/doc.stamp
+
+# Graph dependencies rule
+##########################
+
+.PHONY: graph-deps
+graph-deps: $O/deps.svg
+
+$O/%.svg: $O/%.dot
+	$(call exec,$(DOT) -T svg $< -o $@)
+
+$O/deps.dot: $O/depsfile
+	$(call exec,$(MAKD_PATH)/graph-deps $(GRAPH_DEPS_FLAGS) $< $@,$@,graph-deps)
+
+$O/depsfile: $O/allunittests.d
+	$(call exec,$(DC) $(DFLAGS) -o- -deps=$@ $<)
 
 # Create build directory structure
 ###################################
