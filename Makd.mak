@@ -550,7 +550,7 @@ $O/test-%.stamp: $O/test-%
 	$Vtouch $@
 
 # Documentation rules
-###################
+######################
 
 # General rule to run the harbored-mod generator
 $O/doc.stamp: $(shell find $(SRC) -type f \( -name '*.d' -o -name '*.di' \))
