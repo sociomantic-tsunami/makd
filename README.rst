@@ -246,6 +246,7 @@ whole set of predefined targets are:
 * ``integrationtest``
 * ``doc``
 * ``pkg``
+* ``graph-deps``
 
 Not all of them will be useful out of the box, you need to assign other targets
 to them to be useful. In this category are: ``all`` and ``doc``. For ``all`` we
@@ -278,6 +279,14 @@ for the project from DDOC comments inside source files.  Harbored-mod is
 choosen because it also allows Markdown syntax which makes the documentation
 easier to read in the source files, as it doesn't require as much DDOC macros
 as the dmd.
+
+The ``graph-deps`` target is used to generate a dependencies graph. To generate
+this graph the ``dot`` tool from the `graphviz <http://www.graphviz.org/>`_
+visualization software is used (the location of the tool can be specified via
+the ``DOT`` variable). By default only cyclic dependencies are generated in the
+graph, but other kind of dependencies graphs can be generated (please take
+a look at the ``./graph-deps --help`` ouput for details, you can override the
+options to pass to ``graph-deps`` using the ``GRAPH_DEPS_FLAGS`` variables).
 
 Predefined variables
 --------------------
