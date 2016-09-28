@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
-# This script takes a dmd dependency file, and outputs a graph in graphviz
-# format also, detect cycles
+# This script takes a dmd dependency file, optionally detect cycles, and
+# outputs a graph in graphviz format.
 #
 # Based on: https://github.com/dellort/lumbricus/blob/d2/src/scripts/deps.py
 # Which used code from: http://www.logarithmic.net/pfh/blog/01208083168
@@ -40,13 +40,13 @@ parser.add_option("-h", "--help",
     help="show this help message and exit")
 parser.add_option("-c", "--cycles-only",
     action="store_true", dest="cycles_only", default=False,
-    help="show only nodes, that are parts of a cycle")
+    help="show only nodes that are parts of a cycle")
 parser.add_option("-C", "--cycle-edges-only",
     action="store_true", dest="cycle_edges_only", default=False,
-    help="show only edges, that are part of a cycle")
+    help="show only edges that are part of a cycle")
 parser.add_option("-e", "--exclude",
     action="append", dest="ignore", default=[],
-    help="ignore module (or if it ends with a '.', ignore all packages starting with this)")
+    help="ignore a module or an entire package (if it ends with a '.')")
 parser.add_option("-i", "--include",
     action="append", dest="include", default=[],
     help="include only this module/package (similar to --exclude)")
@@ -61,7 +61,7 @@ parser.add_option("--imports",
     help="include only modules which import this module (transitively)")
 parser.add_option("--imports-depth",
     action="store", type="int", dest="import_depth", default=0,
-    help="how many indirections max for --imports (0 means no restriction)")
+    help="maximum number of indirections for --imports (0 means no limit)")
 
 # options contains all "dest" arg names as normal members
 # args are all left non-option arguments as sequence
