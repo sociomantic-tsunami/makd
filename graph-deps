@@ -39,28 +39,28 @@ parser.add_option("-h", "--help",
     action="callback", callback=print_help,
     help="show this help message and exit")
 parser.add_option("-c", "--cycles-only",
-    action="store_true", dest="cycles_only", default=False,
+    action="store_true", default=False,
     help="show only nodes that are parts of a cycle")
 parser.add_option("-C", "--cycle-edges-only",
-    action="store_true", dest="cycle_edges_only", default=False,
+    action="store_true", default=False,
     help="show only edges that are part of a cycle")
 parser.add_option("-e", "--exclude",
     action="append", dest="ignore", default=[],
     help="ignore a module or an entire package (if it ends with a '.')")
 parser.add_option("-i", "--include",
-    action="append", dest="include", default=[],
+    action="append", default=[],
     help="include only this module/package (similar to --exclude)")
 parser.add_option("-p", "--package-mode",
-    action="store_true", dest="package_mode", default=False,
+    action="store_true", default=False,
     help="show dependencies between packages")
 parser.add_option("--no-std-ignore",
-    action="store_true", dest="no_std_ignore", default=False,
+    action="store_true", default=False,
     help=("don't ignore standard modules (%s)" % std_ignore))
 parser.add_option("--imports",
-    action="append", dest="imports", default=[],
+    action="append", default=[],
     help="include only modules which import this module (transitively)")
 parser.add_option("--imports-depth",
-    action="store", type="int", dest="import_depth", default=0,
+    action="store", type="int", default=0,
     help="maximum number of indirections for --imports (0 means no limit)")
 
 # options contains all "dest" arg names as normal members
