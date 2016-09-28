@@ -272,7 +272,7 @@ work ;). If you can't do that (because you generated a source file for example),
 you can use the special variable ``clean`` too (``clean += src/trash.d
 src/garbage.d`` for example).
 
-The ``doc`` itarget will, by default, call `harbored-mod
+The ``doc`` target will, by default, call `harbored-mod
 <https://github.com/kiith-sa/harbored-mod>`_ tool to generate the documentation
 for the project from DDOC comments inside source files.  Harbored-mod is
 choosen because it also allows Markdown syntax which makes the documentation
