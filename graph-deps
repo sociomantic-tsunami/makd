@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # This script takes a dmd dependency file, optionally detect cycles, and
 # outputs a graph in graphviz format.
@@ -21,15 +21,15 @@ std_exclude = ["object", "tango.", "std.", "core."]
 
 def print_help(option, opt, value, parser, do_exit=True):
     parser.print_help()
-    print ""
-    print "Generate the dependency file with:"
-    print "    dmd -o- -deps=depfile rootfile.d"
-    print ""
-    print "Example to generate a graph with circular dependencies only:"
-    print "    %s -c -C depfile graph.out" % parser.get_prog_name()
-    print ""
-    print "Render graph.out with:"
-    print "    dot -T svg graph.out -o graph.svg"
+    print("")
+    print("Generate the dependency file with:")
+    print("    dmd -o- -deps=depfile rootfile.d")
+    print("")
+    print("Example to generate a graph with circular dependencies only:")
+    print("    %s -c -C depfile graph.out" % parser.get_prog_name())
+    print("")
+    print("Render graph.out with:")
+    print("    dot -T svg graph.out -o graph.svg")
     if do_exit: sys.exit(1)
 
 parser = OptionParser(usage="%prog [options] depfile graph.out",
@@ -102,7 +102,7 @@ def is_excluded(name):
     return False
 
 def getnode(name):
-    if not nodes.has_key(name):
+    if name not in nodes:
         nodes[name] = Node(name, len(nodes))
     return nodes[name]
 
@@ -145,18 +145,18 @@ if options.imports:
     while depth == 0 or n < depth:
         n += 1
         nmark = {}
-        for x in nodes.itervalues():
+        for x in nodes.values():
             if x not in marked:
                 for a in x.adj:
                     if a in marked:
                         nmark[x] = True
         if len(nmark) == 0:
             break
-        for x in nmark.iterkeys():
+        for x in nmark.keys():
             marked[x] = True
     # remove all unmarked nodes
     nodes = {}
-    for x in marked.iterkeys():
+    for x in marked.keys():
         nodes[x.name] = x
         x.adj = [i for i in x.adj if (i in marked)]
 
@@ -185,7 +185,7 @@ def visit(node):
         for item in component:
             low[item] = len(nodes)
 
-for node in nodes.values():
+for node in list(nodes.values()):
     visit(node)
 # end tarjan
 
@@ -205,7 +205,7 @@ outf = open(args[1], "w")
 
 outf.write('digraph "a" {\n')
 
-for node in nodes.values():
+for node in list(nodes.values()):
     if options.cycles_only and not node.cycle >= 0: continue
     label = node.name
     if node.cycle >= 0:
