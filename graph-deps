@@ -17,7 +17,7 @@ from optparse import OptionParser
 import sys
 import re
 
-std_ignore = ["object", "tango.", "std.", "core."]
+std_exclude = ["object", "tango.", "std.", "core."]
 
 def print_help(option, opt, value, parser, do_exit=True):
     parser.print_help()
@@ -45,17 +45,17 @@ parser.add_option("-C", "--cycle-edges-only",
     action="store_true", default=False,
     help="show only edges that are part of a cycle")
 parser.add_option("-e", "--exclude",
-    action="append", dest="ignore", default=[],
-    help="ignore a module or an entire package (if it ends with a '.')")
+    action="append", default=[],
+    help="exclude a module or an entire package (if it ends with a '.')")
 parser.add_option("-i", "--include",
     action="append", default=[],
     help="include only this module/package (similar to --exclude)")
 parser.add_option("-p", "--package-mode",
     action="store_true", default=False,
     help="show dependencies between packages")
-parser.add_option("--no-std-ignore",
+parser.add_option("--no-std-exclude",
     action="store_true", default=False,
-    help=("don't ignore standard modules (%s)" % std_ignore))
+    help=("don't exclude standard modules (%s)" % std_exclude))
 parser.add_option("--imports",
     action="append", default=[],
     help="include only modules which import this module (transitively)")
@@ -67,8 +67,8 @@ parser.add_option("--imports-depth",
 # args are all left non-option arguments as sequence
 (options, args) = parser.parse_args()
 
-if not options.no_std_ignore:
-    options.ignore.extend(std_ignore)
+if not options.no_std_exclude:
+    options.exclude.extend(std_exclude)
 
 if len(args) != 2:
     print_help(None, None, None, parser, False)
@@ -95,8 +95,8 @@ def compare_module_name(name, pattern):
     if pattern.endswith(".") and name.startswith(pattern): return True
     return False
 
-def is_ignored(name):
-    for i in options.ignore:
+def is_excluded(name):
+    for i in options.exclude:
         if compare_module_name(name, i): return True
     if len(options.include) > 0:
         for i in options.include:
@@ -123,11 +123,11 @@ def append_unique(seq, item):
     seq.append(item)
 
 deps = open(args[0])
-# ignores some parts of the information
+# exclude some parts of the information
 p = re.compile("([A-Za-z0-9._]+) \(.*\) : .* : ([A-Za-z0-9._]+) \(.*")
 for line in deps:
     mod, imp = p.match(line).groups()
-    if is_ignored(mod) or is_ignored(imp): continue
+    if is_excluded(mod) or is_excluded(imp): continue
     if options.package_mode:
         mod = mod_to_package(mod)
         imp = mod_to_package(imp)
