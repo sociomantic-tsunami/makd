@@ -21,13 +21,13 @@ std_exclude = ["object", "tango.", "std.", "core."]
 
 def print_help(option, opt, value, parser, do_exit=True):
     parser.print_help()
-    print("")
+    print()
     print("Generate the dependency file with:")
     print("    dmd -o- -deps=depfile rootfile.d")
-    print("")
+    print()
     print("Example to generate a graph with circular dependencies only:")
     print("    %s -c -C depfile graph.out" % parser.get_prog_name())
-    print("")
+    print()
     print("Render graph.out with:")
     print("    dot -T svg graph.out -o graph.svg")
     if do_exit: sys.exit(1)
@@ -185,7 +185,7 @@ def visit(node):
         for item in component:
             low[item] = len(nodes)
 
-for node in list(nodes.values()):
+for node in nodes.values():
     visit(node)
 # end tarjan
 
@@ -205,7 +205,7 @@ outf = open(args[1], "w")
 
 outf.write('digraph "a" {\n')
 
-for node in list(nodes.values()):
+for node in nodes.values():
     if options.cycles_only and not node.cycle >= 0: continue
     label = node.name
     if node.cycle >= 0:
