@@ -19,25 +19,23 @@ import re
 
 std_exclude = ["object", "tango.", "std.", "core."]
 
-def print_help(option, opt, value, parser, do_exit=True):
-    parser.print_help()
-    print()
-    print("Generate the dependency file with:")
-    print("    dmd -o- -deps=depfile rootfile.d")
-    print()
-    print("Example to generate a graph with circular dependencies only:")
-    print("    %s -c -C depfile graph.out" % parser.get_prog_name())
-    print()
-    print("Render graph.out with:")
-    print("    dot -T svg graph.out -o graph.svg")
-    if do_exit: sys.exit(1)
-
 parser = OptionParser(usage="%prog [options] depfile graph.out",
     description="Create a graphviz dependency graph from dmd module dependency file.",
-    add_help_option=False)
-parser.add_option("-h", "--help",
-    action="callback", callback=print_help,
-    help="show this help message and exit")
+    epilog="""
+Generate the dependency file with:
+    dmd -o- -deps=depfile rootfile.d
+
+Example to generate a graph with circular dependencies only:
+    %s -c -C depfile graph.out
+
+Render graph.out with:
+    dot -T svg graph.out -o graph.svg
+
+""")
+
+# Custom formatting for epilog (we don't want automatic text wrapping)
+parser.format_epilog = lambda formatter: parser.epilog % parser.get_prog_name()
+
 parser.add_option("-c", "--cycles-only",
     action="store_true", default=False,
     help="show only nodes that are parts of a cycle")
@@ -62,6 +60,7 @@ parser.add_option("--imports",
 parser.add_option("--imports-depth",
     action="store", type="int", default=0,
     help="maximum number of indirections for --imports (0 means no limit)")
+
 
 # options contains all "dest" arg names as normal members
 # args are all left non-option arguments as sequence
