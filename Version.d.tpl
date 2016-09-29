@@ -34,12 +34,6 @@ else
 
 _tpl_istring[_tpl_istring] version_info;
 
-deprecated("@MODULE@.versionInfo is deprecated. Please rename it to version_info")
-alias version_info versionInfo;
-
-deprecated("Please use @MODULE@.version_info instead (part of the D2 transition)")
-alias version_info Version;
-
 static this()
 {
     version_info["version"] = "@VERSION@";
