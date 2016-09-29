@@ -33,8 +33,6 @@ else
 }
 
 _tpl_istring[_tpl_istring] versionInfo;
-deprecated("Please use @MODULE@.versionInfo instead (part of the D2 transition)")
-alias versionInfo Version;
 
 static this()
 {
