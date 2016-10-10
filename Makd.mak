@@ -211,7 +211,11 @@ VERSION_FILE := $(GS)/Version.d
 # `-` in the dirty separator is also replaced with `~`. This is done for
 # improved Debian version comparison.
 # Example: v1.2.1-4-gea7105b-dirty -> 1.2.1+4~dirty.20160202160552~ea7105b
-PKGVERSION := $(shell $(MAKD_PATH)/mkversion.sh -p | \
+#
+# Shell function doesn't inherit variables exported in Makefile, so
+# explicit passing of `DC` is performed (https://bugs.debian.org/184864)
+#
+PKGVERSION := $(shell DC="$(DC)" $(MAKD_PATH)/mkversion.sh -p | \
                 sed 's/^v\(.*\)/\1/' | \
                 sed 's/^\(.*\)-\([0-9]\+\)-g\([0-9a-f]\+\)/\1+\2~\3/' | \
                 sed 's/^\([^0-9]\)/0\1/' | \
