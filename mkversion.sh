@@ -9,7 +9,7 @@ rev_file=src/Version.d
 author="`git config user.name`"
 
 # Get compiler version
-compiler="`${DC:-dmd1} | head -1`"
+compiler="`${DC:-dmd} | head -1`"
 
 # Get the current date (might be overridden by command-line options later)
 date=$(date -u +"%Y-%m-%d %H:%M:%S %Z")
