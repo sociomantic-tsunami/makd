@@ -640,19 +640,15 @@ fasttest: $(fasttest)
 
 
 .PHONY: d2conv
-d2conv: $O/d2conv.stamp \
-	$(foreach s,$(SUBMODULES),$O/d2conv/$s.stamp)
+d2conv: $O/d2conv.stamp
 
 $O/d2conv.stamp: $C
-	$(call exec,git ls-files | grep '\.d$$' | \
-		xargs --no-run-if-empty d1to2fix,.,d1to2fix)
-
-$O/d2conv/%.stamp: $C/%
-	$(call exec,cd $<; git ls-files | grep '\.d$$' | \
-		xargs --no-run-if-empty d1to2fix,$<,d1to2fix)
-	$Vmkdir -p $(dir $@)
-	$Vtouch $@
-
+	$Vfind $C -type f -regex '^.+\.d$$' > $@
+ifeq "$(shell d1to2fix --help | grep -- --input)" ""
+	$(call exec, d1to2fix --fatal --input=$@)
+else
+	$(call exec, d1to2fix --fatal `cat $@`)
+endif
 
 # Automatic dependency handling
 ################################
