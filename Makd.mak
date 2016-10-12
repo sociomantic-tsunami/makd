@@ -386,8 +386,8 @@ endef
 RDMDFLAGS ?= --force --compiler=$(DC)
 
 # Default dmd flags
-override DFLAGS += -I$(GS) -I./$(SRC) $(foreach dep,$(SUBMODULES), -I./$(dep)/$(SRC))
-
+DIMPORTPATHS := -I$(GS) -I./$(SRC) $(foreach dep,$(SUBMODULES), -I./$(dep)/$(SRC))
+override DFLAGS += $(DIMPORTPATHS)
 
 # Include the user's makefile, Build.mak
 #########################################
@@ -645,7 +645,7 @@ d2conv: $O/d2conv.stamp
 $O/d2conv.stamp: $C
 	$Vfind $C -type f -regex '^.+\.d$$' > $@
 ifeq "$(shell d1to2fix --help | grep -- --input)" ""
-	$(call exec, d1to2fix --fatal --input=$@)
+	$(call exec, d1to2fix $(DIMPORTPATHS) --fatal --input=$@)
 else
 	$(call exec, d1to2fix --fatal `cat $@`)
 endif
