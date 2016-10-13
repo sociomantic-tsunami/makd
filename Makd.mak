@@ -128,6 +128,9 @@ FPM ?= fpm
 # Default dot binary location
 DOT ?= dot
 
+# Default package type
+PKGTYPE ?= deb
+
 # Default flags to pass to graph-deps (see --help for details)
 GRAPH_DEPS_FLAGS ?= -c -C
 
@@ -135,10 +138,11 @@ GRAPH_DEPS_FLAGS ?= -c -C
 # changelog is provided, and a version and iteration (using the Debian version)
 # (defined lazily so we can use target variables)
 ifndef PKG_DEFAULTS
-PKG_DEFAULTS = -D-f -D-sdir -D-tdeb -D--deb-changelog="$O/changelog.Debian" \
+DISTRO_CODENAME="$(shell lsb_release -rs | grep rolling || lsb_release -cs)"
+PKG_DEFAULTS = -D-f -D-sdir -D-t$(PKGTYPE) -D--deb-changelog="$O/changelog.Debian" \
 		-D--version="$(PKGVERSION)" \
-		-D--iteration="$(shell lsb_release -cs)" \
-		-d lsb_release="$(shell lsb_release -cs)"
+		-D--iteration="$(DISTRO_CODENAME)" \
+		-d lsb_release="$(DISTRO_CODENAME)"
 endif
 
 # Before building, we remove any old Debian packages present in the packages
