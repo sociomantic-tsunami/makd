@@ -120,6 +120,10 @@ class Functions:
 
     def autodeps(self, *fnames):
         # XXX: Only debian packages supported for now
+        if subprocess.call([ "dpkg", "--version"]) != 0:
+            errf("'autodeps' is not yet supported on systems without dpkg")
+            sys.exit(1)
+
         from itertools import chain
         deps = set()
         for lib, path in chain(*[self._parse_cmd('ldd', f) for f in fnames]):
