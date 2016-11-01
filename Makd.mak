@@ -222,7 +222,10 @@ VERSION_FILE := $(GS)/Version.d
 
 # Generate a version description for the output binary. This calls `mkversion.sh`
 # script which will generate a version string.
-VERSION := $(shell $(MAKD_PATH)/mkversion.sh -p)
+# XXX: Please note shell function doesn't inherit variables exported in
+#      Makefile, so explicit passing of `DC` is performed (see
+#      https://bugs.debian.org/184864 for an extended explanation)
+VERSION := $(shell DC="$(DC)" $(MAKD_PATH)/mkversion.sh -p)
 
 # Generate a version description for the package
 # This translates between `git describe`-style version and Debian version.
