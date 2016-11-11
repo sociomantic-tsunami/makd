@@ -652,9 +652,9 @@ d2conv: $O/d2conv.stamp
 $O/d2conv.stamp: $C
 	$Vfind $C -type f -regex '^.+\.d$$' > $@
 ifeq "$(shell d1to2fix --help | grep -- --input)" ""
-	$(call exec, d1to2fix $(DIMPORTPATHS) --fatal --input=$@)
-else
 	$(call exec, d1to2fix --fatal `cat $@`)
+else
+	$(call exec, d1to2fix $(DIMPORTPATHS) --fatal --input=$@)
 endif
 
 # Automatic dependency handling
