@@ -651,7 +651,7 @@ d2conv: $O/d2conv.stamp
 
 $O/d2conv.stamp: $C
 	$Vfind $C -type f -regex '^.+\.d$$' > $@
-ifeq "$(shell d1to2fix --help | grep -- --input)" ""
+ifeq "$(shell d1to2fix --help 2>/dev/null | grep -- --input)" ""
 	$(call exec, d1to2fix --fatal `cat $@`)
 else
 	$(call exec, d1to2fix $(DIMPORTPATHS) --fatal --input=$@)
