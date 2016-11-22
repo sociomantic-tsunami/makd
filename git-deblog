@@ -73,6 +73,9 @@ class Tag:
         self.date = date
     def __str__(self):
         return self.name
+    def __repr__(self):
+        return 'Tag({!r}, {!r}, {!r}, {!r})'.format(
+                self.hash, self.name, self.author, self.date)
 
 
 class Commit:
@@ -81,6 +84,8 @@ class Commit:
         self.message = message
     def __str__(self):
         return self.message
+    def __repr__(self):
+        return 'Commit({!r}, {!r})'.format(self.hash, self.message)
 
 
 def get_log(opts=()):
