@@ -16,19 +16,25 @@ ENC = locale.getpreferredencoding()
 def main():
     parser, args = parse_args()
 
-    for i, obj in enumerate(get_log(args.git_log_args)):
-        if i == 0:
-            if isinstance(obj, Commit):
-                tag = Tag(obj.hash, args.initial_version, get_git_author(),
-                        datetime.now())
-            else:
-                tag = obj
-            if args.initial_version:
-                tag.name = args.initial_version
-            if tag.name is None:
-                parser.error('{}: no tag for the last commit, you must '
-                        'specify an initial version (--initial-version)')
+    git_log = get_log(args.git_log_args)
+    if not git_log:
+        return
 
+    first = git_log[0]
+    if isinstance(first, Commit):
+        tag = Tag(first.hash, args.initial_version, get_git_author(),
+                datetime.now())
+    else:
+        tag = first
+    if args.initial_version:
+        tag.name = args.initial_version
+    if tag.name is None:
+        parser.error('{}: no tag for the last commit, you must '
+                'specify an initial version (--initial-version)')
+    if tag is not first:
+        git_log.insert(0, tag)
+
+    for i, obj in enumerate(git_log):
         if isinstance(obj, Tag):
             if i > 0:
                 print()
