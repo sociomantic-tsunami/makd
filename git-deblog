@@ -169,7 +169,7 @@ def parse_args():
             "commit is used if present)")
     parser.add_argument('-d', '--dist-name', default=get_dist(),
             help="specifies the distribution name (by default obtained from "
-            "lsb_release")
+            "lsb_release)")
     parser.add_argument('-u', '--urgency', default='medium',
             choices='low medium high emergency critical'.split(),
             help="specifies the distribution name (by default obtained from "
