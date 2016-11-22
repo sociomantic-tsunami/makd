@@ -172,8 +172,7 @@ def parse_args():
             "lsb_release)")
     parser.add_argument('-u', '--urgency', default='medium',
             choices='low medium high emergency critical'.split(),
-            help="specifies the distribution name (by default obtained from "
-            "lsb_release")
+            help="specifies the urgency of the update, in Debian terms")
     parser.add_argument('pkg_name', help="package name")
     parser.add_argument('git_log_args', nargs=REMAINDER,
             help="extra arguments to be passed to git log")
