@@ -10,6 +10,8 @@ from subprocess import CalledProcessError, PIPE
 
 
 def main():
+    setup_decoder()
+
     parser, args = parse_args()
 
     # Git assumes UTF-8 for commit messages, unless there is a config option
@@ -63,7 +65,12 @@ def run(*args, **kwargs):
     from subprocess import check_output
     encoding = getpreferredencoding()
     dbg('running command: {} (using {} encoding)', args[0], encoding)
-    return check_output(*args, **kwargs).strip().decode(encoding)
+    output = check_output(*args, **kwargs).strip()
+    (output, errors) = decode_count(output, encoding)
+    if errors:
+        warn('found {} errors when trying to decode the output of "{}" '
+                '(using encoding {})', errors, ' '.join(args[0]), encoding)
+    return output
 
 
 def get_dist():
@@ -116,8 +123,10 @@ def get_log(encoding, opts=()):
 
     log = []
     row = ''
+    # Reset decoding errors
+    decoding_error_count = 0
     for l in p.stdout.readlines():
-        l = l.decode(encoding)
+        l = l.decode(encoding, errors="replacecount")
         # accumulate if the end of record is not found
         if not l.endswith('\x1e\n'):
             row += l
@@ -133,6 +142,10 @@ def get_log(encoding, opts=()):
 
     status = p.wait()
     assert status == 0
+
+    if decoding_error_count:
+        warn('found {} errors when trying to decode the output of "git log" '
+                '(using encoding {})', errors, encoding)
 
     return log
 
@@ -198,6 +211,31 @@ def parse_args():
         args.dist_name = get_dist()
 
     return parser, args
+
+
+decoding_error_count = 0
+def setup_decoder():
+    # Extend backslashreplace_errors to handle decode errors too.
+    # Borrowed from:https://gist.github.com/ynkdir/867347
+    # But also store if we had problems decoding
+    import codecs
+    _backslashreplace_errors = codecs.backslashreplace_errors
+    def replacecount_errors(exc):
+        if isinstance(exc, UnicodeDecodeError):
+            global decoding_error_count
+            decoding_error_count += 1
+            tohex = lambda c: "\\x{0:02x}".format(c)
+            u = "".join(tohex(c) for c in exc.object[exc.start:exc.end])
+            return (u, exc.end)
+        return _backslashreplace_errors(exc)
+
+    codecs.register_error("replacecount", replacecount_errors)
+
+
+def decode_count(s, encoding):
+    prev_count = decoding_error_count
+    return (s.decode(encoding, errors="replacecount"),
+            decoding_error_count - prev_count)
 
 
 def dbg(fmt, *args, **kwargs):
