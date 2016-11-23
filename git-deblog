@@ -19,7 +19,7 @@ def main():
     # See: https://git-scm.com/docs/git-commit#_discussion
     commit_encoding = None
     try:
-        commit_encoding = run('git config i18n.commitencoding'.split())
+        commit_encoding = run('git config i18n.logOutputEncoding'.split())
     except CalledProcessError as e:
         if e.returncode != 1: # Config not defined
             raise e
