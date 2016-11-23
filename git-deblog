@@ -5,30 +5,46 @@
 # (See accompanying file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 import sys
-import locale
 from datetime import datetime
 from subprocess import CalledProcessError, PIPE
-
-
-ENC = locale.getpreferredencoding()
 
 
 def main():
     parser, args = parse_args()
 
-    for i, obj in enumerate(get_log(args.git_log_args)):
-        if i == 0:
-            if isinstance(obj, Commit):
-                tag = Tag(obj.hash, args.initial_version, get_git_author(),
-                        datetime.now())
-            else:
-                tag = obj
-            if args.initial_version:
-                tag.name = args.initial_version
-            if tag.name is None:
-                parser.error('{}: no tag for the last commit, you must '
-                        'specify an initial version (--initial-version)')
+    # Git assumes UTF-8 for commit messages, unless there is a config option
+    # overriding it. Even if the config option is not used, Git just emits
+    # warnings, so users could use any encoding, so we allow overriding this
+    # via command-line options.
+    # See: https://git-scm.com/docs/git-commit#_discussion
+    commit_encoding = None
+    try:
+        commit_encoding = run('git config i18n.commitencoding'.split())
+    except CalledProcessError as e:
+        if e.returncode != 1: # Config not defined
+            raise e
+    if not commit_encoding:
+        commit_encoding = 'UTF-8'
 
+    git_log = get_log(commit_encoding, args.git_log_args)
+    if not git_log:
+        return
+
+    first = git_log[0]
+    if isinstance(first, Commit):
+        tag = Tag(first.hash, args.initial_version, get_git_author(),
+                datetime.now())
+    else:
+        tag = first
+    if args.initial_version:
+        tag.name = args.initial_version
+    if tag.name is None:
+        parser.error('{}: no tag for the last commit, you must '
+                'specify an initial version (--initial-version)')
+    if tag is not first:
+        git_log.insert(0, tag)
+
+    for i, obj in enumerate(git_log):
         if isinstance(obj, Tag):
             if i > 0:
                 print()
@@ -43,8 +59,11 @@ def main():
 
 
 def run(*args, **kwargs):
+    from locale import getpreferredencoding
     from subprocess import check_output
-    return check_output(*args, **kwargs).strip().decode(ENC)
+    encoding = getpreferredencoding()
+    dbg('running command: {} (using {} encoding)', args[0], encoding)
+    return check_output(*args, **kwargs).strip().decode(encoding)
 
 
 def get_dist():
@@ -73,6 +92,9 @@ class Tag:
         self.date = date
     def __str__(self):
         return self.name
+    def __repr__(self):
+        return 'Tag({!r}, {!r}, {!r}, {!r})'.format(
+                self.hash, self.name, self.author, self.date)
 
 
 class Commit:
@@ -81,19 +103,21 @@ class Commit:
         self.message = message
     def __str__(self):
         return self.message
+    def __repr__(self):
+        return 'Commit({!r}, {!r})'.format(self.hash, self.message)
 
 
-def get_log(opts=()):
+def get_log(encoding, opts=()):
     from subprocess import Popen
 
     cmd = ('git', 'log') + tuple(opts) + ('--format=%h%x1f%D%x1f%s%x1e',)
-    dbg('running command: {}', cmd)
+    dbg('running command: {} (using {} encoding)', cmd, encoding)
     p = Popen(cmd, stdout=PIPE)
 
     log = []
     row = ''
     for l in p.stdout.readlines():
-        l = l.decode(ENC)
+        l = l.decode(encoding)
         # accumulate if the end of record is not found
         if not l.endswith('\x1e\n'):
             row += l
@@ -156,13 +180,12 @@ def parse_args():
     parser.add_argument('-i', '--initial-version',
             help="specifies an initial version (by default the tag of the last "
             "commit is used if present)")
-    parser.add_argument('-d', '--dist-name', default=get_dist(),
+    parser.add_argument('-d', '--dist-name',
             help="specifies the distribution name (by default obtained from "
-            "lsb_release")
+            "lsb_release)")
     parser.add_argument('-u', '--urgency', default='medium',
             choices='low medium high emergency critical'.split(),
-            help="specifies the distribution name (by default obtained from "
-            "lsb_release")
+            help="specifies the urgency of the update, in Debian terms")
     parser.add_argument('pkg_name', help="package name")
     parser.add_argument('git_log_args', nargs=REMAINDER,
             help="extra arguments to be passed to git log")
@@ -170,6 +193,9 @@ def parse_args():
 
     global VERBOSE
     VERBOSE = args.verbose
+
+    if args.dist_name is None:
+        args.dist_name = get_dist()
 
     return parser, args
 
