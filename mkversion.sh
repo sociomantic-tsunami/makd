@@ -8,9 +8,6 @@
 rev_file=src/Version.d
 author="`git config user.name`"
 
-# Get compiler version
-compiler="`${DC:-dmd} | head -1`"
-
 # Get the current date (might be overridden by command-line options later)
 date=$(date -u +"%Y-%m-%d %H:%M:%S %Z")
 
@@ -25,7 +22,7 @@ Options:
 
 -o FILE      Where to write the output (Version.d) file (default: $rev_file)
 -a AUTHOR    Author of the build (default: detected, currently $author)
--d DATE      Build date string (default: output of '$date_cmd')
+-d DATE      Build date string (default now: $date)
 -m MODULE    Module name to use in the module declaration (default: built from -o)
 -v           Be more verbose (print a message if the file was updated)
 -p           Only print this repository version and exit
@@ -72,6 +69,9 @@ then
     echo $version
     exit 0
 fi
+
+# Get compiler version
+compiler="`${DC:-dmd} | head -1`"
 
 template="$1"; shift
 
