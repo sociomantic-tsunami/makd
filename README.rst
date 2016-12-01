@@ -601,9 +601,6 @@ particular target. This is a corner case and hopefully you won't need to use it.
 Packaging
 ---------
 
-.. warning:: This feature is still considered experimental. Use with care and
-             expect breakage.
-
 Makd supports a simple facility to make packages based on fpm_.  A simple
 wrapper program ``mkpkg`` is provided to ease the creation of scripts that use
 fpm_ to create packages.  The predefined ``pkg`` target will scan for ``*.pkg``
