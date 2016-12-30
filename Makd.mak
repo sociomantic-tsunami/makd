@@ -176,8 +176,9 @@ endif
 ##############
 
 # Location of the submodules (libraries the project depends on)
-SUBMODULES ?= $(shell test -r $T/.gitmodules && \
-		sed -n 's/^\s*path\s*=\s//p' $T/.gitmodules)
+SUBMODULES ?= $(shell git config -f $T/.gitmodules --name-only \
+			  --get-regexp'^submodule\.[^\.]+.*\.path$' | \
+			  xargs -n1 git config -f $T/.gitmodules --path --get)
 
 # Name of the build directory (to use when excluding some paths)
 BUILD_DIR_NAME ?= build
