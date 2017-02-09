@@ -657,6 +657,9 @@ variable ``FUN``:
         function is tightly coupled to Debian packages for now. If a ``path``
         is given, then all the ``bin`` passed will be prepended with this
         ``path``.
+``mapbins(src, dst, bin[, ...])``
+        A very simple function that just returns a list with
+        ``{src}/{bin}={dst}/{bin}{VAR.suffix}`` for each ``bin`` passed.
 
 Generated packages will be stored in the ``$P`` directory (by default
 ``$G/pkg``. Since each package usually have a different name, as the version
