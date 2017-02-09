@@ -656,10 +656,12 @@ variable ``FUN``:
         multiple binaries to get a list of dependencies for all of them. This
         function is tightly coupled to Debian packages for now. If a ``path``
         is given, then all the ``bin`` passed will be prepended with this
-        ``path``.
+        ``path``. ``bin``\ s can be passed as multiple arguments or as one
+        list.
 ``mapbins(src, dst, bin[, ...])``
         A very simple function that just returns a list with
         ``{src}/{bin}={dst}/{bin}{VAR.suffix}`` for each ``bin`` passed.
+        ``bin``\ s can be passed as multiple arguments or as one list.
 
 Generated packages will be stored in the ``$P`` directory (by default
 ``$G/pkg``. Since each package usually have a different name, as the version
