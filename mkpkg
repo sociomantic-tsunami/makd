@@ -148,6 +148,11 @@ class Functions:
                 continue
         return sorted(deps)
 
+    def mapbins(self, src, dst, *bins):
+        return sorted(['{src}/{bin}={dst}/{bin}{suffix}'.format(
+                src=src, dst=dst, bin=b, suffix=pkg.vars['suffix'])
+                    for b in bins])
+
 
 class Package:
 
