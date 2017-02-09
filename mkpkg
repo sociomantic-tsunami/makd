@@ -118,18 +118,27 @@ class Functions:
         debugf("Output: {}", output)
         return regex.findall(output)
 
+    def _expand_list(self, files, path=''):
+        if path and not path.endswith('/'):
+            path += '/'
+        s = set()
+        for f in files:
+            if type(f) in (list, tuple, set, frozenset):
+                s.update(path + f)
+            else:
+                s.add(path + f)
+        return s
+
     def autodeps(self, *fnames, path=''):
         # XXX: Only debian packages supported for now
         if subprocess.call([ "dpkg", "--version"]) != 0:
             errf("'autodeps' is not yet supported on systems without dpkg")
             sys.exit(1)
 
-        if path and not path.endswith('/'):
-            path += '/'
-
         from itertools import chain
         deps = set()
-        parsed_commands = [self._parse_cmd('ldd', path + f) for f in fnames]
+        parsed_commands = [self._parse_cmd('ldd', f)
+                for f in self._expand_list(fnames, path)]
         for lib, lib_path in chain(*parsed_commands):
             if lib in self.autodeps_exclusions:
                 debugf("`{}` is in autodeps_exclusions, skipping...", lib)
@@ -151,7 +160,7 @@ class Functions:
     def mapbins(self, src, dst, *bins):
         return sorted(['{src}/{bin}={dst}/{bin}{suffix}'.format(
                 src=src, dst=dst, bin=b, suffix=pkg.vars['suffix'])
-                    for b in bins])
+                    for b in self._expand_list(bins)])
 
 
 class Package:
