@@ -724,20 +724,17 @@ For convenience, here is a simple example:
           vendor = 'Sociomantic Labs GmbH',
         )
 
-``$P/test1.pkg``:
+``$P/daemon.pkg``:
 
 .. code:: py
 
         from defaults import OPTS
 
-        pkg_name = 'makd' + VAR.suffix
-
-        bin_name = 'daemon'
-        bin_path = VAR.bindir + '/' + bin_name
+        bins = 'daemon admtool util1'
 
         OPTS.update(
 
-          name = pkg_name,
+          name = VAR.name,
 
           description = '''\
         Test package packing some daemon
@@ -748,30 +745,28 @@ For convenience, here is a simple example:
 
           category = 'net',
 
-          depends = FUN.autodeps(bin_path) + [ 'bash',
-            'libnew' if VAR.lsb_release == 'trusty' else 'libold' ],
+          depends = FUN.autodeps(bins, path=VAR.bindir) + [
+              'bash',
+              'libnew' if VAR.lsb_release == 'trusty' else 'libold',
+            ],
 
         )
 
-        ARGS = [
-          bin_path + '=/usr/sbin/' + bin_name + VAR.suffix,
-          'README.rst=/usr/share/doc/' + pkg_name '/',
+        ARGS = VAR.mapbins(VAR.bindir, '/usr/sbin', bins) + [
+          'README.rst=/usr/share/doc/' + VAR.name '/',
         ]
 
-``$P/test2.pkg``:
+``$P/client.pkg``:
 
 .. code:: py
 
         from defaults import OPTS
 
-        pkg_name = 'makd' + VAR.suffix
-
-        bin_name = 'util'
-        bin_path = VAR.bindir + '/' + bin_name
+        bins = 'client clitool'
 
         OPTS.update(
 
-          name = pkg_name,
+          name = VAR.name,
 
           description = '''Test package packing some daemon
         This is an extended package description with multiple lines
@@ -783,26 +778,23 @@ For convenience, here is a simple example:
 
           category = 'net',
 
-          config_files = [ '/etc/util.conf', '/etc/anoter.conf' ],
-
-          depends = FUN.autodeps(bin_path),
+          depends = FUN.autodeps(bins, path=VAR.bindir),
         )
 
-        ARGS = [
-          bin_path + '=/usr/bin/' + bin_name + VAR.suffix,
+        ARGS = VAR.mapbins(VAR.bindir, '/usr/bin', bins) + [
           'util.conf=/etc/',
         ]
 
-Suppose that the targets ``daemon`` and ``util`` build the binaries ``daemon``
-and ``util`` respectively, then you probably want to make sure you build those
-before making the package, so in the ``Build.mak`` file you should put
-something like:
+Suppose that the targets ``daemon`` and ``client`` build the binaries
+``daemon``, ``admtool``, ``util1`` and ``client``, ``clitool`` respectively,
+then you probably want to make sure you build those before making the package,
+so in the ``Build.mak`` file you should put something like:
 
 .. code:: make
 
         $O/pkg-daemon.stamp: daemon
 
-        $O/pkg-util.stamp: util
+        $O/pkg-client.stamp: util
 
 With this configuration, a call to ``make pkg`` will leave the built packages
 in the ``$P`` directory.
