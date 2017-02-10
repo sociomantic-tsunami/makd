@@ -11,3 +11,5 @@ New Features
 
   - A new function 'FUN.mapbins()` was added to ease specifying binaries to
     include in the package.
+
+Milestone: https://github.com/sociomantic-tsunami/makd/milestone/12?closed=1
