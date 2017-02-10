@@ -2,6 +2,9 @@
 Makd
 ====
 
+Description
+===========
+
 **Makd** is a GNU Make library/framework based on Makeit_, adapted to D. It
 combines the power of Make and rdmd to provide a lot of free functionality,
 like implicit rules to compile binaries (only when necessary), tracking if any
@@ -12,6 +15,29 @@ necessary, etc.
 
 Makd by default runs dmd1 compiler, as it supports D1, but compiling with D2 is
 also supported (see under `D2 support`_ for details).
+
+Versioning
+----------
+
+MakD complies with `Netptune <https://github.com/sociomantic-tsunami/neptune>`_
+for versioning.
+
+Support Guarantees
+------------------
+
+* Major branch development period: undefined
+* Maintained minor versions: 2 most recent
+
+Maintained Major Branches
+-------------------------
+
+====== ==================== ===============
+Major  Initial release date Supported until
+====== ==================== ===============
+v1.x.x v1.4.0_: 24/06/2016  TBD
+====== ==================== ===============
+.. _v1.4.0: https://github.com/sociomantic-tsunami/makd/releases/tag/v1.4.0
+
 
 .. contents::
 
