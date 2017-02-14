@@ -124,14 +124,15 @@ class Functions:
         s = set()
         for f in files:
             if type(f) in (list, tuple, set, frozenset):
-                s.update(path + f)
+                s.update([path + ff for ff in f])
             else:
                 s.add(path + f)
         return s
 
     def autodeps(self, *fnames, path=''):
         # XXX: Only debian packages supported for now
-        if subprocess.call([ "dpkg", "--version"]) != 0:
+        s = subprocess.call(["dpkg", "--version"], stdout=subprocess.DEVNULL)
+        if s != 0:
             errf("'autodeps' is not yet supported on systems without dpkg")
             sys.exit(1)
 
@@ -159,7 +160,7 @@ class Functions:
 
     def mapbins(self, src, dst, *bins):
         return sorted(['{src}/{bin}={dst}/{bin}{suffix}'.format(
-                src=src, dst=dst, bin=b, suffix=pkg.vars['suffix'])
+                src=src, dst=dst, bin=b, suffix=self.pkg.vars['suffix'])
                     for b in self._expand_list(bins)])
 
 
