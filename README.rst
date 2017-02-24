@@ -652,9 +652,15 @@ These files are expected to be Python scripts defining two variables:
 An extra built-in variable will be available, ``VAR``, containing variables
 passed to the ``mkpkg`` util. By default Makd pass the following variables:
 
-``name``
-        name of the package as calculated from the ``.pkg`` file, including the
-        ``SUFFIX``.
+``shortname``
+        name of the package as calculated from the ``.pkg`` file.
+
+``suffix``
+        a suffix to add to the package name to support installing multiple
+        versions simultaneously (see `Package suffix`_ for details).
+
+``fullname``
+        ``shortname`` with the ``suffix`` appended to it for conveniece.
 
 ``version``
         package version number as defined by ``PKGVERSION``.
@@ -664,10 +670,6 @@ passed to the ``mkpkg`` util. By default Makd pass the following variables:
 
 ``bindir``
         directory where the built binaries are stored.
-
-``suffix``
-        a suffix to add to the package name to support installing multiple
-        versions simultaneously (see `Package suffix`_ for details).
 
 ``lsb_release``
         Debian ``lsb_release -uc`` content (distribution name).
@@ -760,7 +762,7 @@ For convenience, here is a simple example:
 
         OPTS.update(
 
-          name = VAR.name,
+          name = VAR.fullname,
 
           description = '''\
         Test package packing some daemon
@@ -779,7 +781,7 @@ For convenience, here is a simple example:
         )
 
         ARGS = VAR.mapbins(VAR.bindir, '/usr/sbin', bins) + [
-          'README.rst=/usr/share/doc/' + VAR.name '/',
+          'README.rst=/usr/share/doc/' + VAR.fullname '/',
         ]
 
 ``$P/client.pkg``:
@@ -792,7 +794,7 @@ For convenience, here is a simple example:
 
         OPTS.update(
 
-          name = VAR.name,
+          name = VAR.fullname,
 
           description = '''Test package packing some daemon
         This is an extended package description with multiple lines

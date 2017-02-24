@@ -456,6 +456,7 @@ $O/pkg-%.stamp: $(PKG)/%.pkg
 		$(PKG_DEFAULTS) \
 		-d suffix="$(PKG_SUFFIX)" -d version="$(PKGVERSION)" \
 		-d builddir="$G" -d bindir="$B" -d name="$*$(PKG_SUFFIX)" \
+		-d fullname="$*$(PKG_SUFFIX)" -d shortname="$*" \
 		$<,$<,mkpkg)
 	$Vtouch $@
 
