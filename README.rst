@@ -1000,7 +1000,6 @@ Remember to re-run ``make`` if you change any sources, the test programs need to
 be re-compiled in that case!
 
 
-
-.. _Makeit: http://git.llucax.com.ar/w/software/makeit.git
+.. _Makeit: https://git.llucax.com/w/software/makeit.git
 .. _fpm: https://github.com/jordansissel/fpm
 
