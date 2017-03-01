@@ -660,7 +660,7 @@ passed to the ``mkpkg`` util. By default Makd pass the following variables:
         versions simultaneously (see `Package suffix`_ for details).
 
 ``fullname``
-        ``shortname`` with the ``suffix`` appended to it for conveniece.
+        ``shortname`` with the ``suffix`` appended to it for convenience.
 
 ``version``
         package version number as defined by ``PKGVERSION``.
