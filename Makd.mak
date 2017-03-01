@@ -128,6 +128,9 @@ FPM ?= fpm
 # Default dot binary location
 DOT ?= dot
 
+# Default package type
+PKGTYPE ?= deb
+
 # Default flags to pass to graph-deps (see --help for details)
 GRAPH_DEPS_FLAGS ?= -c -C
 
@@ -135,10 +138,11 @@ GRAPH_DEPS_FLAGS ?= -c -C
 # changelog is provided, and a version and iteration (using the Debian version)
 # (defined lazily so we can use target variables)
 ifndef PKG_DEFAULTS
-PKG_DEFAULTS = -D-f -D-sdir -D-tdeb -D--deb-changelog="$O/changelog.Debian" \
+DISTRO_CODENAME="$(shell lsb_release -rs | grep rolling || lsb_release -cs)"
+PKG_DEFAULTS = -D-f -D-sdir -D-t$(PKGTYPE) -D--deb-changelog="$O/changelog.Debian" \
 		-D--version="$(PKGVERSION)" \
-		-D--iteration="$(shell lsb_release -cs)" \
-		-d lsb_release="$(shell lsb_release -cs)"
+		-D--iteration="$(DISTRO_CODENAME)" \
+		-d lsb_release="$(DISTRO_CODENAME)"
 endif
 
 # Before building, we remove any old Debian packages present in the packages
@@ -172,8 +176,10 @@ endif
 ##############
 
 # Location of the submodules (libraries the project depends on)
-SUBMODULES ?= $(shell test -r $T/.gitmodules && \
-		sed -n 's/^\s*path\s*=\s//p' $T/.gitmodules)
+SUBMODULES ?= $(shell git config -f $T/.gitmodules \
+			  --get-regexp '^submodule\.[^\.]+.*\.path$$' | \
+			  cut -d' ' -f1 | \
+			  xargs -rn1 git config -f $T/.gitmodules --path --get)
 
 # Name of the build directory (to use when excluding some paths)
 BUILD_DIR_NAME ?= build
@@ -218,7 +224,10 @@ VERSION_FILE := $(GS)/Version.d
 
 # Generate a version description for the output binary. This calls `mkversion.sh`
 # script which will generate a version string.
-VERSION := $(shell $(MAKD_PATH)/mkversion.sh -p)
+# XXX: Please note shell function doesn't inherit variables exported in
+#      Makefile, so explicit passing of `DC` is performed (see
+#      https://bugs.debian.org/184864 for an extended explanation)
+VERSION := $(shell DC="$(DC)" $(MAKD_PATH)/mkversion.sh -p)
 
 # Generate a version description for the package
 # This translates between `git describe`-style version and Debian version.
@@ -386,8 +395,8 @@ endef
 RDMDFLAGS ?= --force --compiler=$(DC)
 
 # Default dmd flags
-override DFLAGS += -I$(GS) -I./$(SRC) $(foreach dep,$(SUBMODULES), -I./$(dep)/$(SRC))
-
+DIMPORTPATHS := -I$(GS) -I./$(SRC) $(foreach dep,$(SUBMODULES), -I./$(dep)/$(SRC))
+override DFLAGS += $(DIMPORTPATHS)
 
 # Include the user's makefile, Build.mak
 #########################################
@@ -447,6 +456,7 @@ $O/pkg-%.stamp: $(PKG)/%.pkg
 		$(PKG_DEFAULTS) \
 		-d suffix="$(PKG_SUFFIX)" -d version="$(PKGVERSION)" \
 		-d builddir="$G" -d bindir="$B" -d name="$*$(PKG_SUFFIX)" \
+		-d fullname="$*$(PKG_SUFFIX)" -d shortname="$*" \
 		$<,$<,mkpkg)
 	$Vtouch $@
 
@@ -640,19 +650,15 @@ fasttest: $(fasttest)
 
 
 .PHONY: d2conv
-d2conv: $O/d2conv.stamp \
-	$(foreach s,$(SUBMODULES),$O/d2conv/$s.stamp)
+d2conv: $O/d2conv.stamp
 
 $O/d2conv.stamp: $C
-	$(call exec,git ls-files | grep '\.d$$' | \
-		xargs --no-run-if-empty d1to2fix,.,d1to2fix)
-
-$O/d2conv/%.stamp: $C/%
-	$(call exec,cd $<; git ls-files | grep '\.d$$' | \
-		xargs --no-run-if-empty d1to2fix,$<,d1to2fix)
-	$Vmkdir -p $(dir $@)
-	$Vtouch $@
-
+	$Vfind $C -type f -regex '^.+\.d$$' > $@
+ifeq "$(shell d1to2fix --help 2>/dev/null | grep -- --input)" ""
+	$(call exec, d1to2fix --fatal `cat $@`)
+else
+	$(call exec, d1to2fix $(DIMPORTPATHS) --fatal --input=$@)
+endif
 
 # Automatic dependency handling
 ################################

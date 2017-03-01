@@ -2,6 +2,9 @@
 Makd
 ====
 
+Description
+===========
+
 **Makd** is a GNU Make library/framework based on Makeit_, adapted to D. It
 combines the power of Make and rdmd to provide a lot of free functionality,
 like implicit rules to compile binaries (only when necessary), tracking if any
@@ -12,6 +15,29 @@ necessary, etc.
 
 Makd by default runs dmd1 compiler, as it supports D1, but compiling with D2 is
 also supported (see under `D2 support`_ for details).
+
+Versioning
+----------
+
+MakD complies with `Netptune <https://github.com/sociomantic-tsunami/neptune>`_
+for versioning.
+
+Support Guarantees
+------------------
+
+* Major branch development period: undefined
+* Maintained minor versions: 2 most recent
+
+Maintained Major Branches
+-------------------------
+
+====== ==================== ===============
+Major  Initial release date Supported until
+====== ==================== ===============
+v1.x.x v1.4.0_: 24/06/2016  TBD
+====== ==================== ===============
+.. _v1.4.0: https://github.com/sociomantic-tsunami/makd/releases/tag/v1.4.0
+
 
 .. contents::
 
@@ -601,9 +627,6 @@ particular target. This is a corner case and hopefully you won't need to use it.
 Packaging
 ---------
 
-.. warning:: This feature is still considered experimental. Use with care and
-             expect breakage.
-
 Makd supports a simple facility to make packages based on fpm_.  A simple
 wrapper program ``mkpkg`` is provided to ease the creation of scripts that use
 fpm_ to create packages.  The predefined ``pkg`` target will scan for ``*.pkg``
@@ -629,9 +652,15 @@ These files are expected to be Python scripts defining two variables:
 An extra built-in variable will be available, ``VAR``, containing variables
 passed to the ``mkpkg`` util. By default Makd pass the following variables:
 
-``name``
-        name of the package as calculated from the ``.pkg`` file, including the
-        ``SUFFIX``.
+``shortname``
+        name of the package as calculated from the ``.pkg`` file.
+
+``suffix``
+        a suffix to add to the package name to support installing multiple
+        versions simultaneously (see `Package suffix`_ for details).
+
+``fullname``
+        ``shortname`` with the ``suffix`` appended to it for convenience.
 
 ``version``
         package version number as defined by ``PKGVERSION``.
@@ -642,22 +671,25 @@ passed to the ``mkpkg`` util. By default Makd pass the following variables:
 ``bindir``
         directory where the built binaries are stored.
 
-``suffix``
-        a suffix to add to the package name to support installing multiple
-        versions simultaneously (see `Package suffix`_ for details).
-
 ``lsb_release``
         Debian ``lsb_release -uc`` content (distribution name).
 
 ``mkpkg`` also defines the following built-in functions in the special built-in
 variable ``FUN``:
 
-``autodeps(bin[, ...])``
+``autodeps(bin[, ...][, path=''])``
         returns a sorted ``list()`` of packages ``bin`` depends on based on the
         outcome of running the ``ldd`` utility and searching to which packages
         the libraries is linked belong to using ``dpkg``. You can specify
         multiple binaries to get a list of dependencies for all of them. This
-        function is tighly coupled to Debian packages for now.
+        function is tightly coupled to Debian packages for now. If a ``path``
+        is given, then all the ``bin`` passed will be prepended with this
+        ``path``. ``bin``\ s can be passed as multiple arguments or as one
+        list.
+``mapbins(src, dst, bin[, ...])``
+        A very simple function that just returns a list with
+        ``{src}/{bin}={dst}/{bin}{VAR.suffix}`` for each ``bin`` passed.
+        ``bin``\ s can be passed as multiple arguments or as one list.
 
 Generated packages will be stored in the ``$P`` directory (by default
 ``$G/pkg``. Since each package usually have a different name, as the version
@@ -720,20 +752,17 @@ For convenience, here is a simple example:
           vendor = 'Sociomantic Labs GmbH',
         )
 
-``$P/test1.pkg``:
+``$P/daemon.pkg``:
 
 .. code:: py
 
         from defaults import OPTS
 
-        pkg_name = 'makd' + VAR.suffix
-
-        bin_name = 'daemon'
-        bin_path = VAR.bindir + '/' + bin_name
+        bins = 'daemon admtool util1'
 
         OPTS.update(
 
-          name = pkg_name,
+          name = VAR.fullname,
 
           description = '''\
         Test package packing some daemon
@@ -744,30 +773,28 @@ For convenience, here is a simple example:
 
           category = 'net',
 
-          depends = FUN.autodeps(bin_path) + [ 'bash',
-            'libnew' if VAR.lsb_release == 'trusty' else 'libold' ],
+          depends = FUN.autodeps(bins, path=VAR.bindir) + [
+              'bash',
+              'libnew' if VAR.lsb_release == 'trusty' else 'libold',
+            ],
 
         )
 
-        ARGS = [
-          bin_path + '=/usr/sbin/' + bin_name + VAR.suffix,
-          'README.rst=/usr/share/doc/' + pkg_name '/',
+        ARGS = VAR.mapbins(VAR.bindir, '/usr/sbin', bins) + [
+          'README.rst=/usr/share/doc/' + VAR.fullname '/',
         ]
 
-``$P/test2.pkg``:
+``$P/client.pkg``:
 
 .. code:: py
 
         from defaults import OPTS
 
-        pkg_name = 'makd' + VAR.suffix
-
-        bin_name = 'util'
-        bin_path = VAR.bindir + '/' + bin_name
+        bins = 'client clitool'
 
         OPTS.update(
 
-          name = pkg_name,
+          name = VAR.fullname,
 
           description = '''Test package packing some daemon
         This is an extended package description with multiple lines
@@ -779,26 +806,23 @@ For convenience, here is a simple example:
 
           category = 'net',
 
-          config_files = [ '/etc/util.conf', '/etc/anoter.conf' ],
-
-          depends = FUN.autodeps(bin_path),
+          depends = FUN.autodeps(bins, path=VAR.bindir),
         )
 
-        ARGS = [
-          bin_path + '=/usr/bin/' + bin_name + VAR.suffix,
+        ARGS = VAR.mapbins(VAR.bindir, '/usr/bin', bins) + [
           'util.conf=/etc/',
         ]
 
-Suppose that the targets ``daemon`` and ``util`` build the binaries ``daemon``
-and ``util`` respectively, then you probably want to make sure you build those
-before making the package, so in the ``Build.mak`` file you should put
-something like:
+Suppose that the targets ``daemon`` and ``client`` build the binaries
+``daemon``, ``admtool``, ``util1`` and ``client``, ``clitool`` respectively,
+then you probably want to make sure you build those before making the package,
+so in the ``Build.mak`` file you should put something like:
 
 .. code:: make
 
         $O/pkg-daemon.stamp: daemon
 
-        $O/pkg-util.stamp: util
+        $O/pkg-client.stamp: util
 
 With this configuration, a call to ``make pkg`` will leave the built packages
 in the ``$P`` directory.
@@ -1004,7 +1028,6 @@ Remember to re-run ``make`` if you change any sources, the test programs need to
 be re-compiled in that case!
 
 
-
-.. _Makeit: http://git.llucax.com.ar/w/software/makeit.git
+.. _Makeit: https://git.llucax.com/w/software/makeit.git
 .. _fpm: https://github.com/jordansissel/fpm
 
