@@ -377,7 +377,6 @@ Variables you might want to override
   your project with a different DMD by using ``make
   DC=/usr/bin/experimental-dmd`` for example. Same for ``RDMD``, ``D1TO2FIX``
   and ``FPM``.
-* ``D_GC`` to change the default (cdgc) GC implementation to use.
 * Less likely you might want to override the ``DFLAGS``, ``RDMDFLAGS`` or
   ``FPMFLAGS``, but usually there are better methods to do that instead.
 * ``TEST_FILTER_OUT`` to exclude some files from the unit tests or integration
