@@ -111,11 +111,6 @@ endif
 # Default rdmd binary to use (same as with dmd)
 RDMD ?= rdmd
 
-# Garbage Collector to use
-# (exported because other programs might use the variable)
-D_GC ?= cdgc
-export D_GC
-
 # Default documentation generator tool to use (harbored-mod)
 HMOD ?= hmod
 
