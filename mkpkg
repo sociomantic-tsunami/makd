@@ -213,6 +213,8 @@ class Package:
     def load(self, fname):
         import runpy
         global __builtins__
+        __builtins__.OPTS = {}
+        __builtins__.ARGS = []
         __builtins__.VAR = AttrDict(self.vars)
         __builtins__.FUN = self.functions
         sys.path.insert(0, os.path.dirname(fname))
@@ -224,10 +226,15 @@ class Package:
         except Exception as e:
             die("can't load package definition file '{}'", fname, _tb=True,
                     _remove_tb=4)
+        else:
+            pkg['OPTS'] = __builtins__.OPTS
+            pkg['ARGS'] = __builtins__.ARGS
         finally:
             sys.path.pop(0)
             del __builtins__.VAR
             del __builtins__.FUN
+            del __builtins__.OPTS
+            del __builtins__.ARGS
 
         def checked_get(name, type):
             if name not in pkg:

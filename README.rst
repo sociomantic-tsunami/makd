@@ -632,7 +632,11 @@ fpm_ to create packages.  The predefined ``pkg`` target will scan for ``*.pkg``
 files in the ``$(PKG)`` directory (by default ``$T/pkg``) and then invoke
 ``mkpkg`` with them.
 
-These files are expected to be Python scripts defining two variables:
+These files are expected to be Python scripts. They have some pre-defined
+built-in variables, some of which the user is expected to fill and some of
+which are tools for the user to define packages.
+
+These are the built-in variables that the user should fill:
 
 ``OPTS``
         a ``dict()`` (associative array) where each item will be mapped to
@@ -648,8 +652,12 @@ These files are expected to be Python scripts defining two variables:
         a ``list()`` (array) to pass to fpm_ as positional arguments (usually the
         list of files to include in the package).
 
+These variables should never be rebound (never assign to them like ``OPTS
+= dict(...)``), you always need to update them instead (normally using
+``OPTS.update(...)`` and ``ARGS.extend([...])``).
+
 An extra built-in variable will be available, ``VAR``, containing variables
-passed to the ``mkpkg`` util. By default Makd pass the following variables:
+passed to the ``mkpkg`` util. By default Makd passes the following variables:
 
 ``shortname``
         name of the package as calculated from the ``.pkg`` file.
@@ -767,7 +775,7 @@ For convenience, here is a simple example:
 .. code:: py
 
         # This is a normal python module defining some defaults
-        OPTS = dict(
+        OPTS.update(
           description = '''\
         Test package packing some daemon
         This is an extended package description with multiple lines
@@ -783,7 +791,7 @@ For convenience, here is a simple example:
 
 .. code:: py
 
-        from defaults import OPTS
+        import defaults
 
         bins = 'daemon admtool util1'
 
@@ -800,15 +808,15 @@ For convenience, here is a simple example:
 
         )
 
-        ARGS = FUN.mapfiles(VAR.bindir, '/usr/sbin', bins) + [
+        ARGS.extend(FUN.mapfiles(VAR.bindir, '/usr/sbin', bins) + [
           'README.rst=/usr/share/doc/' + VAR.fullname '/',
-        ]
+        ])
 
 ``$P/client.pkg``:
 
 .. code:: py
 
-        from defaults import OPTS
+        import defaults
 
         bins = 'client clitool'
 
@@ -824,8 +832,8 @@ For convenience, here is a simple example:
           depends = FUN.autodeps(bins, path=VAR.bindir),
         )
 
-        ARGS = FUN.mapfiles(VAR.bindir, '/usr/bin', bins)
-        ARGS += FUN.mapfiles('.', '/etc', 'util.conf', append_suffix=False)
+        ARGS.extend(FUN.mapfiles(VAR.bindir, '/usr/bin', bins))
+        ARGS.extend(FUN.mapfiles('.', '/etc', 'util.conf', append_suffix=False))
 
 Suppose that the targets ``daemon`` and ``client`` build the binaries
 ``daemon``, ``admtool``, ``util1`` and ``client``, ``clitool`` respectively,
