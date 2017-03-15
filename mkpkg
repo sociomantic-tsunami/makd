@@ -163,6 +163,27 @@ class Functions:
                 src=src, dst=dst, bin=b, suffix=self.pkg.vars['suffix'])
                     for b in self._expand_list(bins)])
 
+    def desc(self, OPTS, type='', prolog='', epilog=''):
+        try:
+            d = OPTS['description']
+        except (TypeError, KeyError):
+            die("FUN.desc() requires an OPTS['description'] to be defined")
+        try:
+            d = d.splitlines()
+            firstline = d[0]
+        except (AttributeError, KeyError):
+            die("FUN.desc() requires an OPTS['description'] that is a "
+                    "non-empty string")
+        if type:
+            type = ' (' + type + ')'
+        type += '\n'
+        if prolog:
+            prolog += '\n\n'
+        if epilog:
+            epilog = '\n\n' + epilog
+        rest = '\n'.join(d[1:])
+        return firstline + type + prolog + rest + epilog
+
 
 class Package:
 
