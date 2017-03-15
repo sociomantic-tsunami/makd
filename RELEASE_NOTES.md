@@ -7,6 +7,14 @@ New Features
   replaces the old `VAR.name` to make it more explicit, `VAR.shortname` contains
   only the package name, without the `VAR.suffix`.
 
+* `FUN.desc()`
+
+  A simple function to customize `OPTS['description']`. It can add an optional
+  `type` of package (will append ` (<type>)` to the first line (short
+  description), `prolog` (inserted before the long description) and an `epilog`
+  (appended at the end of the long description.
+
+
 Deprecations
 ============
 
