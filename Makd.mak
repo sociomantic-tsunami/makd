@@ -449,7 +449,7 @@ pkg: $(patsubst $(PKG)/%.pkg,$O/pkg-%.stamp,$(wildcard $(PKG)/*.pkg))
 # Target to build a package based on the fpm definition (old packages are
 # removed to avoid infinite pollution of the build directory, as every package
 # is a different file)
-$O/pkg-%.stamp: $(PKG)/%.pkg
+$O/pkg-%.stamp: $(PKG)/%.pkg $G/pkg-flags
 	$(PKG_PREBUILD)
 	$(call exec,PYTHONDONTWRITEBYTECODE=1 $(MAKD_PATH)/mkpkg \
 		$(if $V,,-vv) -D-p"$P" -F "$(FPM)" \
@@ -615,6 +615,17 @@ setup_flag_files__ := $(setup_flag_files__)$(call gen_rebuild_flags, \
 
 # Print any generated message (if verbose)
 $(if $V,$(if $(setup_flag_files__), \
+	$(info !! Flags or commands changed:$(setup_flag_files__) re-building \
+			affected files...)))
+
+# Same for packages
+PKG.FLAGS := $(call varcat,PKG_SUFFIX FPM)
+
+setup_pkg_flag_files__ := $(setup_pkg_flag_files__)$(call gen_rebuild_flags, \
+	$G/pkg-flags, $(PKG.FLAGS),Packaging flags)
+
+# Print any generated message (if verbose)
+$(if $V,$(if $(setup_pkg_flag_files__), \
 	$(info !! Flags or commands changed:$(setup_flag_files__) re-building \
 			affected files...)))
 

@@ -798,7 +798,7 @@ For convenience, here is a simple example:
 
         )
 
-        ARGS = VAR.mapbins(VAR.bindir, '/usr/sbin', bins) + [
+        ARGS = FUN.mapbins(VAR.bindir, '/usr/sbin', bins) + [
           'README.rst=/usr/share/doc/' + VAR.fullname '/',
         ]
 
@@ -822,7 +822,7 @@ For convenience, here is a simple example:
           depends = FUN.autodeps(bins, path=VAR.bindir),
         )
 
-        ARGS = VAR.mapbins(VAR.bindir, '/usr/bin', bins) + [
+        ARGS = FUN.mapbins(VAR.bindir, '/usr/bin', bins) + [
           'util.conf=/etc/',
         ]
 
