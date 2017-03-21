@@ -24,3 +24,5 @@ Deprecations
 ============
 
 * `VAR.name` is deprecated, please use `VAR.fullname` instead.
+
+* `FUN.mapbins()` is deprecated, please use `FUN.mapfiles()` instead.

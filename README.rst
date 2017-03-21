@@ -693,10 +693,6 @@ variable ``FUN``:
         argument ``append_suffix`` can be passed at the end to control whether
         ``VAR.suffix`` is appended to each destination file. ``append_suffix``
         defaults to ``True`` if not given.
-``mapbins(src, dst, bin[, ...])``
-        A very simple function that just returns a list with
-        ``{src}/{bin}={dst}/{bin}{VAR.suffix}`` for each ``bin`` passed.
-        ``bin``\ s can be passed as multiple arguments or as one list.
 ``desc(OPTS, [type[, prolog[, epilog]]])``
         A simple function to customize ``OPTS['description']``. It can add an
         optional ``type`` of package (will append `` (<type>)`` to the first
@@ -805,7 +801,7 @@ For convenience, here is a simple example:
 
         )
 
-        ARGS = FUN.mapbins(VAR.bindir, '/usr/sbin', bins) + [
+        ARGS = FUN.mapfiles(VAR.bindir, '/usr/sbin', bins) + [
           'README.rst=/usr/share/doc/' + VAR.fullname '/',
         ]
 
@@ -829,9 +825,8 @@ For convenience, here is a simple example:
           depends = FUN.autodeps(bins, path=VAR.bindir),
         )
 
-        ARGS = FUN.mapbins(VAR.bindir, '/usr/bin', bins) + [
-          'util.conf=/etc/',
-        ]
+        ARGS = FUN.mapfiles(VAR.bindir, '/usr/bin', bins)
+        ARGS += FUN.mapfiles('.', '/etc', 'util.conf', append_suffix=False)
 
 Suppose that the targets ``daemon`` and ``client`` build the binaries
 ``daemon``, ``admtool``, ``util1`` and ``client``, ``clitool`` respectively,
