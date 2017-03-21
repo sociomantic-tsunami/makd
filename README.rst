@@ -686,6 +686,13 @@ variable ``FUN``:
         is given, then all the ``bin`` passed will be prepended with this
         ``path``. ``bin``\ s can be passed as multiple arguments or as one
         list.
+``mapfiles(src, dst, file[, ...][, append_suffix=True])``
+        A very simple function that just returns a list with
+        ``{src}/{file}={dst}/{file}{VAR.suffix}`` for each ``file`` passed.
+        ``file``\ s can be passed as multiple arguments or as one list. A named
+        argument ``append_suffix`` can be passed at the end to control whether
+        ``VAR.suffix`` is appended to each destination file. ``append_suffix``
+        defaults to ``True`` if not given.
 ``mapbins(src, dst, bin[, ...])``
         A very simple function that just returns a list with
         ``{src}/{bin}={dst}/{bin}{VAR.suffix}`` for each ``bin`` passed.

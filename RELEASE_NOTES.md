@@ -14,6 +14,11 @@ New Features
   description), `prolog` (inserted before the long description) and an `epilog`
   (appended at the end of the long description.
 
+* `FUN.mapfiles()`
+
+  A simple function to ease specifying files to include in the package (with the
+  ability to control whether `VAR.suffix` is appended to each destination file
+  using the named argument `append_suffix`).
 
 Deprecations
 ============
