@@ -685,10 +685,32 @@ variable ``FUN``:
         is given, then all the ``bin`` passed will be prepended with this
         ``path``. ``bin``\ s can be passed as multiple arguments or as one
         list.
-``mapbins(src, dst, bin[, ...])``
+``mapfiles(src, dst, file[, ...][, append_suffix=True])``
         A very simple function that just returns a list with
-        ``{src}/{bin}={dst}/{bin}{VAR.suffix}`` for each ``bin`` passed.
-        ``bin``\ s can be passed as multiple arguments or as one list.
+        ``{src}/{file}={dst}/{file}{VAR.suffix}`` for each ``file`` passed.
+        ``file``\ s can be passed as multiple arguments or as one list. A named
+        argument ``append_suffix`` can be passed at the end to control whether
+        ``VAR.suffix`` is appended to each destination file. ``append_suffix``
+        defaults to ``True`` if not given.
+``desc(OPTS, [type[, prolog[, epilog]]])``
+        A simple function to customize ``OPTS['description']``. It can add an
+        optional ``type`` of package (will append `` (<type>)`` to the first
+        line (short description), ``prolog`` (inserted before the long
+        description) and an ``epilog`` (appended at the end of the long
+        description. To use only one of them, you can use Python's keyword
+        arguments syntax. Examples:
+
+        .. code:: py
+
+                FUN.desc(OPTS, 'common files', 'These are just config files',
+                    'Part of whatever') # All specified
+                FUN.desc(OPTS, epilog='Just an epilog')
+                FUN.desc(OPTS, 'a type', epilog='And an epilog')
+                FUN.desc(OPTS, prolog='A prolog',
+                    epilog='And an epilog, but no type')
+
+        Note that ``OPTS['desciption']`` must be defined and hold a non-empty
+        string.
 
 Generated packages will be stored in the ``$P`` directory (by default
 ``$G/pkg``. Since each package usually have a different name, as the version
@@ -746,6 +768,12 @@ For convenience, here is a simple example:
 
         # This is a normal python module defining some defaults
         OPTS = dict(
+          description = '''\
+        Test package packing some daemon
+        This is an extended package description with multiple lines
+
+        This is a longer paragraph in the package description that
+        can span multiple lines.''',
           url = 'https://github.com/sociomantic/makd',
           maintainer = 'Sociomantic Labs GmbH <info@sociomantic.com>',
           vendor = 'Sociomantic Labs GmbH',
@@ -763,13 +791,6 @@ For convenience, here is a simple example:
 
           name = VAR.fullname,
 
-          description = '''\
-        Test package packing some daemon
-        This is an extended package description with multiple lines
-
-        This is a longer paragraph in the package description that
-        can span multiple lines.''',
-
           category = 'net',
 
           depends = FUN.autodeps(bins, path=VAR.bindir) + [
@@ -779,7 +800,7 @@ For convenience, here is a simple example:
 
         )
 
-        ARGS = VAR.mapbins(VAR.bindir, '/usr/sbin', bins) + [
+        ARGS = FUN.mapfiles(VAR.bindir, '/usr/sbin', bins) + [
           'README.rst=/usr/share/doc/' + VAR.fullname '/',
         ]
 
@@ -795,22 +816,16 @@ For convenience, here is a simple example:
 
           name = VAR.fullname,
 
-          description = '''Test package packing some daemon
-        This is an extended package description with multiple lines
-
-        All the lines that starts with a space or tab will be joined
-        together when passed to fpm (and the leading spaces will be
-        removed).
-        '''
+          description = FUN.desc(OPTS, 'tools', epilog='These are just ' +
+            'utilities for the daemon package'),
 
           category = 'net',
 
           depends = FUN.autodeps(bins, path=VAR.bindir),
         )
 
-        ARGS = VAR.mapbins(VAR.bindir, '/usr/bin', bins) + [
-          'util.conf=/etc/',
-        ]
+        ARGS = FUN.mapfiles(VAR.bindir, '/usr/bin', bins)
+        ARGS += FUN.mapfiles('.', '/etc', 'util.conf', append_suffix=False)
 
 Suppose that the targets ``daemon`` and ``client`` build the binaries
 ``daemon``, ``admtool``, ``util1`` and ``client``, ``clitool`` respectively,
