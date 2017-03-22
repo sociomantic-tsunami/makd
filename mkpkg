@@ -165,12 +165,6 @@ class Functions:
                 src=src, dst=dst, bin=b, suffix=suffix)
                     for b in self._expand_list(bins)])
 
-    def mapbins(self, src, dst, *bins):
-        warnf("'FUN.mapbins()' is deprecated, please use 'FUN.mapfiles()' instead")
-        return sorted(['{src}/{bin}={dst}/{bin}{suffix}'.format(
-                src=src, dst=dst, bin=b, suffix=self.pkg.vars['suffix'])
-                    for b in self._expand_list(bins)])
-
     def desc(self, OPTS, type='', prolog='', epilog=''):
         try:
             d = OPTS['description']
