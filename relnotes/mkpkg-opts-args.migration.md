@@ -6,4 +6,4 @@
 
   Change `from defaults import OPTS, ARGS` to `import defaults`.
 
-  This change helps making much compact utility functions.
+  This change helps making much compact utility functions. See changes on `FUN.desc()` for an example.
