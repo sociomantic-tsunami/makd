@@ -9,3 +9,6 @@ Migration Instructions
 
 * The deprecated packaging function `FUN.mapbins()` was removed, use
   `FUN.mapfiles()` instead.
+
+* The deprecated packaging variable `VAR.name` was removed, use `VAR.fullname`
+  instead.
