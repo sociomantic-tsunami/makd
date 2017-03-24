@@ -490,7 +490,7 @@ $O/pkg-%.stamp: $(PKG)/%.pkg $G/pkg-flags
 		$(if $V,,-vv) -D-p"$P" -F "$(FPM)" \
 		$(PKG_DEFAULTS) \
 		-d suffix="$(PKG_SUFFIX)" -d version="$(PKGVERSION)" \
-		-d builddir="$G" -d bindir="$B" -d name="$*$(PKG_SUFFIX)" \
+		-d builddir="$G" -d bindir="$B" \
 		-d fullname="$*$(PKG_SUFFIX)" -d shortname="$*" \
 		$<,$<,mkpkg)
 	$Vtouch $@
