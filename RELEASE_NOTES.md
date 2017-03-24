@@ -28,4 +28,11 @@ Migration Instructions
 
   Change ``from defaults import OPTS, ARGS`` to ``import defaults``.
 
-  This change helps making much compact utility functions.
+  This change helps making much compact utility functions. See changes on
+  ``FUN.desc()``.
+
+* The ``FUN.desc()`` function for defining packages now doesn't take ``OPTS`` as
+  an argument, it just gets the ``OPTS['description']`` from the built-in
+  ``OPTS``.
+
+  Change ``FUN.desc(OPTS, ...)`` to ``FUN.desc(...)``.

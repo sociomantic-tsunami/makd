@@ -700,7 +700,7 @@ variable ``FUN``:
         argument ``append_suffix`` can be passed at the end to control whether
         ``VAR.suffix`` is appended to each destination file. ``append_suffix``
         defaults to ``True`` if not given.
-``desc(OPTS, [type[, prolog[, epilog]]])``
+``desc([type[, prolog[, epilog]]])``
         A simple function to customize ``OPTS['description']``. It can add an
         optional ``type`` of package (will append `` (<type>)`` to the first
         line (short description), ``prolog`` (inserted before the long
@@ -710,11 +710,11 @@ variable ``FUN``:
 
         .. code:: py
 
-                FUN.desc(OPTS, 'common files', 'These are just config files',
+                FUN.desc('common files', 'These are just config files',
                     'Part of whatever') # All specified
-                FUN.desc(OPTS, epilog='Just an epilog')
-                FUN.desc(OPTS, 'a type', epilog='And an epilog')
-                FUN.desc(OPTS, prolog='A prolog',
+                FUN.desc(epilog='Just an epilog')
+                FUN.desc('a type', epilog='And an epilog')
+                FUN.desc(prolog='A prolog',
                     epilog='And an epilog, but no type')
 
         Note that ``OPTS['desciption']`` must be defined and hold a non-empty
@@ -824,7 +824,7 @@ For convenience, here is a simple example:
 
           name = VAR.fullname,
 
-          description = FUN.desc(OPTS, 'tools', epilog='These are just ' +
+          description = FUN.desc('tools', epilog='These are just ' +
             'utilities for the daemon package'),
 
           category = 'net',
