@@ -159,11 +159,19 @@ class Functions:
         return sorted(deps)
 
     def mapfiles(self, src, dst, *bins, **kwargs):
-        append_suffix = kwargs.get('append_suffix', True)
-        suffix = self.pkg.vars['suffix'] if append_suffix else ''
-        return sorted(['{src}/{bin}={dst}/{bin}{suffix}'.format(
-                src=src, dst=dst, bin=b, suffix=suffix)
-                    for b in self._expand_list(bins)])
+        if bins:
+            append_suffix = kwargs.get('append_suffix', True)
+            suffix = self.pkg.vars['suffix'] if append_suffix else ''
+            result = sorted(['{src}/{bin}={dst}/{bin}{suffix}'.format(
+                        src=src, dst=dst, bin=b, suffix=suffix)
+                            for b in self._expand_list(bins)])
+        else:
+            if not src.endswith('/'):
+                src += '/'
+            if not dst.endswith('/'):
+                dst += '/'
+            result = ['{src}={dst}'.format(src=src, dst=dst)]
+        return result
 
     def mapbins(self, src, dst, *bins):
         warnf("'FUN.mapbins()' is deprecated, please use 'FUN.mapfiles()' instead")
