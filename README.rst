@@ -19,7 +19,7 @@ also supported (see under `D2 support`_ for details).
 Versioning
 ----------
 
-MakD complies with `Netptune <https://github.com/sociomantic-tsunami/neptune>`_
+MakD complies with `Neptune <https://github.com/sociomantic-tsunami/neptune>`_
 for versioning.
 
 Support Guarantees
