@@ -710,7 +710,7 @@ variable ``FUN``:
                 FUN.desc(OPTS, prolog='A prolog',
                     epilog='And an epilog, but no type')
 
-        Note that ``OPTS['desciption']`` must be defined and hold a non-empty
+        Note that ``OPTS['description']`` must be defined and hold a non-empty
         string.
 
 Generated packages will be stored in the ``$P`` directory (by default
