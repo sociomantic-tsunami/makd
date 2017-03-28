@@ -19,7 +19,7 @@ also supported (see under `D2 support`_ for details).
 Versioning
 ----------
 
-MakD complies with `Netptune <https://github.com/sociomantic-tsunami/neptune>`_
+MakD complies with `Neptune <https://github.com/sociomantic-tsunami/neptune>`_
 for versioning.
 
 Support Guarantees
@@ -686,13 +686,17 @@ variable ``FUN``:
         is given, then all the ``bin`` passed will be prepended with this
         ``path``. ``bin``\ s can be passed as multiple arguments or as one
         list.
-``mapfiles(src, dst, file[, ...][, append_suffix=True])``
+``mapfiles(src, dst, [file[, ...]][, append_suffix=True])``
         A very simple function that just returns a list with
         ``{src}/{file}={dst}/{file}{VAR.suffix}`` for each ``file`` passed.
-        ``file``\ s can be passed as multiple arguments or as one list. A named
-        argument ``append_suffix`` can be passed at the end to control whether
-        ``VAR.suffix`` is appended to each destination file. ``append_suffix``
-        defaults to ``True`` if not given.
+        ``file``\ s can be passed as multiple arguments or as one list. If no
+        ``file``\ s are passed, a simple ``{src}/={dst}/`` mapping is returned
+        which results in the directory structure under ``src`` (including all
+        contained files) being replicated as-is from the local filesystem into
+        ``dst`` within the package. A named argument ``append_suffix`` can be
+        passed at the end to control whether ``VAR.suffix`` is appended to each
+        destination file. ``append_suffix`` defaults to ``True`` if not given,
+        and is only applicable when at least one ``file`` is passed.
 ``desc(OPTS, [type[, prolog[, epilog]]])``
         A simple function to customize ``OPTS['description']``. It can add an
         optional ``type`` of package (will append `` (<type>)`` to the first
@@ -827,6 +831,7 @@ For convenience, here is a simple example:
 
         ARGS = FUN.mapfiles(VAR.bindir, '/usr/bin', bins)
         ARGS += FUN.mapfiles('.', '/etc', 'util.conf', append_suffix=False)
+        ARGS += FUN.mapfiles('doc', '/usr/share/doc')
 
 Suppose that the targets ``daemon`` and ``client`` build the binaries
 ``daemon``, ``admtool``, ``util1`` and ``client``, ``clitool`` respectively,
