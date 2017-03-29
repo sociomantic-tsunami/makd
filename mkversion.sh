@@ -101,7 +101,7 @@ do
     echo "$ver_desc" | egrep -q '^[0-9a-f]{7}(-dirty)?$'  &&
         ver_desc=`cd $lib && git rev-parse --abbrev-ref HEAD`-g"$ver_desc"
 
-    libs="${libs}    versionInfo[\"lib_${lib_base}\"] = \"${ver_desc}\";\\n"
+    libs="${libs}    version_info[\"lib_${lib_base}\"] = \"${ver_desc}\";\\n"
 done
 sed -i "s/@LIBRARIES@/$libs/" "$tmp"
 

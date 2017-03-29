@@ -20,4 +20,7 @@ Deprecations
 
 * `FUN.mapbins()` is deprecated, please use `FUN.mapfiles()` instead.
 
+* The `versionInfo` AA containing all the automatically deduced version
+  information is deprecated, please use `version_info` instead.
+
 Milestone: https://github.com/sociomantic-tsunami/makd/milestone/20?closed=1
