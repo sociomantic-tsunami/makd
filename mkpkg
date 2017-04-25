@@ -161,6 +161,10 @@ class Functions:
     def mapfiles(self, src, dst, *files, **kwargs):
         append_suffix = kwargs.get('append_suffix', True)
         suffix = self.pkg.vars['suffix'] if append_suffix else ''
+
+        src = src.rstrip('/')
+        dst = dst.rstrip('/')
+
         return sorted(['{src}/{bin}={dst}/{bin}{suffix}'.format(
                 src=src, dst=dst, bin=b, suffix=suffix)
                     for b in self._expand_list(files)])
