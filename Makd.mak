@@ -565,6 +565,40 @@ $O/test-%.stamp: $O/test-%
 	$(call exec,$< $(ITFLAGS),$<,run)
 	$Vtouch $@
 
+# examples rules
+##########################
+
+# examples are assumed to be standalone programs, so we recursively search
+# for files examples/*.d and assume that each file is a separate example
+# program. Files can exist in sub-directories under examples/ dir.
+# The sources list is filtered through the $(EXAMPLES_FILTER_OUT) variable 
+# contents (using the Make function $(filter-out)), so you can exclude an
+# example by adding the example file path (as an absolute path using $C) to
+# this variable.
+
+# The 'example' target builds all the examples.
+.PHONY: example
+example: $(patsubst $T/example/%.d,$O/example/%,\
+	$(filter-out $(EXAMPLE_FILTER_OUT),$(shell find $T/example/ -name "*.d")))
+
+# General rule to build an example program.
+$O/example/%: BUILD.d.depfile = $O/example/$*.mak
+$O/example/%: $T/example/%.d $G/build-d-flags
+	$(call build_d)
+	$Vdirname $(patsubst $O/example/%,$B/example/%,$@) | xargs mkdir -p
+	$Vcp $@ $(patsubst $O/example/%,$B/example/%,$@)
+
+# The 'example-run' target builds and runs all the examples.
+.PHONY: example-run
+example-run: $(patsubst $T/example/%.d,$O/example/%.run,\
+	$(filter-out $(EXAMPLE_FILTER_OUT),$(shell find $T/example/ -name "*.d")))
+
+# General rule to run an example program.
+# Don't touch a timestamp file so we would compile once but run every time.
+$O/example/%.run: $O/example/%
+	$(eval EXECUTABLE := $(patsubst $O/example/%.run,$B/example/%,$@))
+	$(call exec,$(EXECUTABLE),$(EXECUTABLE),run example)
+
 # Documentation rules
 ######################
 

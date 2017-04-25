@@ -270,6 +270,8 @@ whole set of predefined targets are:
 * ``allunittest``
 * ``fastunittest``
 * ``integrationtest``
+* ``example``
+* ``example-run``
 * ``doc``
 * ``pkg``
 * ``graph-deps``
@@ -289,6 +291,12 @@ The ``fasttest`` target will only run the ``fastunittest`` target by default,
 but you can add more too by using the ``fasttest`` special variable.
 
 See the Testing_ section for more details.
+
+The ``example`` target will compile every ``.d`` file found under the
+``example/`` directory. The ``example-run`` target will compile and run
+all the found examples. An example can be skipped by adding the file to the
+``$(EXAMPLE_FILTER_OUT)`` variable. Check `Skipping tests`_ section for a
+similar example of filtering out files.
 
 The ``pkg`` target builds all packages defined in ``$P``, see Packaging_
 section for more details.
