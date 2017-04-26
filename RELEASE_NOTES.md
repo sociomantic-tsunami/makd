@@ -38,3 +38,27 @@ Migration Instructions
   ``OPTS``.
 
   Change ``FUN.desc(OPTS, ...)`` to ``FUN.desc(...)``.
+
+* The `integrationtest` target is not compiled using `-unittest -debug=UnitTest
+  -version=UnitTest` anymore as it complicates debugging and it wastes resources
+  (as not only the unit tests for those programs will be run but also all the
+  test for the library code will be run too).
+
+  Unit tests for the integrations tests are still run but now by the `unittest`
+  and `fastunittest` targets instead of `integrationtest`.
+
+* `main.d` files in `$(SRC)` will no longer be automatically added to
+  `TEST_FILTER_OUT` and it's not recommended to add them back manually either.
+   It is recommended to conditionally compile the `main()` function only when
+   not unit-testing instead:
+
+   ```d
+    version (UnitTest) {} else
+    void main()
+    {
+        // stuff
+    }
+    ```
+
+    This applies too to the integration tests `main.d` files.
+

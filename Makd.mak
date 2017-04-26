@@ -260,7 +260,7 @@ PKGVERSION := $(shell echo $(VERSION) | \
 # whitespaces and each pattern can have one '%' that's used as a wildcard.
 # For more information refer to the documentation:
 # http://www.gnu.org/software/make/manual/make.html#Text-Functions
-TEST_FILTER_OUT := $C/$(SRC)/%/main.d
+TEST_FILTER_OUT :=
 
 
 # Functions
@@ -488,7 +488,8 @@ fasttest := fastunittest $(fasttest)
 test := unittest $(test)
 
 # Files to be tested in unittests, the user could potentially add more
-UNITTEST_FILES += $(call find_files,.d,,$C/$(SRC),$(TEST_FILTER_OUT))
+UNITTEST_FILES += $(call find_files,.d,,$C/$(SRC),$(TEST_FILTER_OUT)) \
+		$(call find_files,.d,,$C/$(INTEGRATIONTEST),$(TEST_FILTER_OUT))
 
 # Files to test when using fast or all unit tests
 $O/fastunittests.d: $(filter-out %_slowtest.d,$(UNITTEST_FILES))
@@ -516,8 +517,10 @@ endif
 $O/%unittests.d: $G/build-d-flags
 	$(call exec,printf 'module $(patsubst $O/%.d,%,$@);\n\
 		$(TEST_RUNNER_STRING)\n\
-		\n$(foreach f,$(filter %.d,$^),\
-		import $(subst /,.,$(patsubst $C/$(SRC)/%.d,%,$f));\n)' > \
+		\n$(foreach f,$(filter $C/$(SRC)/%.d,$^),\
+		import $(subst /,.,$(patsubst $C/$(SRC)/%.d,%,$f));\n)\
+		$(foreach f,$(filter $C/$(INTEGRATIONTEST)/%.d,$^),\
+		import $(subst /,.,$(patsubst $C/%.d,%,$f));\n)' > \
 			$@,,gen)
 
 # Configure dependencies files specific to each special unittests target
@@ -537,7 +540,7 @@ $O/%unittests.stamp: $O/%unittests
 			))),-p $p) \
 		$(foreach p,$(notdir $(shell \
 			find $T/$(SRC) -maxdepth 1 -mindepth 1 -type d \
-			)),-p $p.) $(UTFLAGS),$<,run)
+			)),-p $p.) -p $(INTEGRATIONTEST). $(UTFLAGS),$<,run)
 	$Vtouch $@
 
 # Integration tests rules
@@ -564,7 +567,7 @@ test += integrationtest
 # building any other binary but including unittests too.
 $O/test-%: BUILD.d.depfile = $O/test-$*.mak
 $O/test-%: $T/$(INTEGRATIONTEST)/%/main.d $G/build-d-flags
-	$(call build_d,-unittest -debug=UnitTest -version=UnitTest)
+	$(call build_d)
 
 # General rule to Run the test suite binaries
 $O/test-%.stamp: $O/test-%
