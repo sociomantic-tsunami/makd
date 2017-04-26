@@ -911,10 +911,6 @@ when you use the corresponding ``test`` and ``fasttest`` targets.
 
 Automatic *unittest* and integration tests support is added on top of that.
 
-All the tests are built using these extra options::
-
-        -unittest -debug=UnitTest -version=UnitTest
-
 If you have a test script, you can easily add the target to run that script to
 ``$(test)`` too (or ``$(fasttest))`` and ``$(test)`` if it's really fast).
 For example:
@@ -933,8 +929,13 @@ Unit tests
 ~~~~~~~~~~
 
 Only *unittest* that live in the directory specified by the ``$(SRC)`` variable
-are built and run automatically, the ``unittest`` target will scan for all the
-files with the ``.d`` suffix there.
+and the ``test`` directory (`Integration tests`_) are built and run
+automatically, the ``unittest`` target will scan for all the files with the
+``.d`` suffix there.
+
+All the unit tests are built using these extra options::
+
+        -unittest -debug=UnitTest -version=UnitTest
 
 There are two different categories of *unittest* though: fast and slow. Tests
 are assumed to be fast unless they are separated to a different file, with the
@@ -965,9 +966,22 @@ into the file generated to run the unit tests (importing all modules), you can
 define ``TEST_RUNNER_MODULE`` as an empty variable and then put the contents
 you want to add to the file in the ``TEST_RUNNER_STRING`` variable.
 
+Bear in mind that unless you exclude files with a ``main()`` function (see
+`Skipping tests`_), you'll get link errors about having multiple definitions
+for ``main()``. To avoid this issue you should ``version`` out all the
+``main()`` functions in your project (both to produce project binaries or to
+produce `Integration tests`_):
+
+.. code:: D
+
+        version (UnitTest) {} else
+        void main()
+        {
+            // stuff
+        }
+
 Integration tests
 ~~~~~~~~~~~~~~~~~
-
 
 Integration tests are expected to live in the ``$(INTEGRATIONTEST)`` directory
 (``test`` by default), and it is expected that each subdirectory there is
