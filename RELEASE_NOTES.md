@@ -11,6 +11,10 @@ Migration Instructions
 * The deprecated packaging function `FUN.mapbins()` was removed, use
   `FUN.mapfiles()` instead.
 
+* `FUN.mapfiles()` could previously be called with only the source and
+  destination directories (i.e. without any files). Passing at least one file to
+  the function is now mandatory.
+
 * The deprecated packaging variable `VAR.name` was removed, use `VAR.fullname`
   instead.
 
