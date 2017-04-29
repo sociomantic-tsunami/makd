@@ -159,6 +159,8 @@ class Functions:
         return sorted(deps)
 
     def mapfiles(self, src, dst, *bins, **kwargs):
+        if not bins:
+            die("'FUN.mapfiles()' expects at least one file to be passed")
         append_suffix = kwargs.get('append_suffix', True)
         suffix = self.pkg.vars['suffix'] if append_suffix else ''
         return sorted(['{src}/{bin}={dst}/{bin}{suffix}'.format(
