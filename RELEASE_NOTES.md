@@ -13,6 +13,8 @@ New Features
 
   A simple function to ease specifying files to include in the package (with the ability to control whether `VAR.suffix` is appended to each destination file using the named argument `append_suffix`).
 
+* Now the location of integrationtest is configurable through the ``INTEGRATIONTEST`` Make variable.
+
 Deprecations
 ============
 
