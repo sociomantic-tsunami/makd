@@ -47,6 +47,9 @@ Migration Instructions
   Unit tests for the integrations tests are still run but now by the `unittest`
   and `fastunittest` targets instead of `integrationtest`.
 
+* Integration tests default location changed from `test` to `integrationtest`.
+  The location can be set explicitly via the variable ``INTEGRATIONTEST``.
+
 * `main.d` files in `$(SRC)` will no longer be automatically added to
   `TEST_FILTER_OUT` and it's not recommended to add them back manually either.
    It is recommended to conditionally compile the `main()` function only when
