@@ -51,13 +51,7 @@ PKG := $T/pkg
 -include $T/Config.local.mak
 
 # Directory where all the integration tests are
-ifndef INTEGRATIONTEST
-__dummy_integrationtest_warning := $(shell echo "MakD Warning: The default \
-	location of integration tests (defined by \$$(INTEGRATIONTEST) and 'test' \
-	by default now) will change to 'integrationtest' in v2.0.0. If you want to \
-	avoid this warning, please define it explicitly in your Config.mak." >&2)
-endif
-INTEGRATIONTEST ?= test
+INTEGRATIONTEST ?= integrationtest
 
 # Default location to look for examples
 EXAMPLE ?= example
