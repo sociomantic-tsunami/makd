@@ -36,6 +36,9 @@ F ?= devel
 # use "." for the current directory)
 SRC = src
 
+# Directory where all the integration tests are
+INTEGRATIONTEST ?= test
+
 # Directory were this makefile is located (this must be done BEFORE including
 # any other Makefile)
 MAKD_PATH := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
@@ -540,16 +543,18 @@ $O/%unittests.stamp: $O/%unittests
 ##########################
 
 # Integration tests are assumed to be standalone programs, so we just search
-# for files test/%/main.d and assume they are the entry point of the program
-# (and each subdirectory in test/ is a separate program).
+# for files $(INTEGRATIONTEST)/%/main.d and assume they are the entry point of
+# the program (and each subdirectory in $(INTEGRATIONTEST)/ is a separate
+# program).
 # The sources list is filtered through the $(TEST_FILTER_OUT) variable contents
 # (using the Make function $(filter-out)), so you can exclude an integration
 # test by adding the location of the main.d (as an absolute path using $C) by
 # adding it to this variable.
 # The target integrationtest builds and runs all the integration tests.
 .PHONY: integrationtest
-integrationtest: $(patsubst $T/test/%/main.d,$O/test-%.stamp,\
-		$(filter-out $(TEST_FILTER_OUT),$(wildcard $T/test/*/main.d)))
+integrationtest: $(patsubst $T/$(INTEGRATIONTEST)/%/main.d,$O/test-%.stamp,\
+		$(filter-out $(TEST_FILTER_OUT),\
+		$(wildcard $T/$(INTEGRATIONTEST)/*/main.d)))
 
 # Add integrationtest to the test general target
 test += integrationtest
@@ -557,7 +562,7 @@ test += integrationtest
 # General rule to build integration tests programs, this is the same as
 # building any other binary but including unittests too.
 $O/test-%: BUILD.d.depfile = $O/test-$*.mak
-$O/test-%: $T/test/%/main.d $G/build-d-flags
+$O/test-%: $T/$(INTEGRATIONTEST)/%/main.d $G/build-d-flags
 	$(call build_d,-unittest -debug=UnitTest -version=UnitTest)
 
 # General rule to Run the test suite binaries
