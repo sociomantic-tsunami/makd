@@ -36,9 +36,6 @@ F ?= devel
 # use "." for the current directory)
 SRC = src
 
-# Directory where all the integration tests are
-INTEGRATIONTEST ?= test
-
 # Directory were this makefile is located (this must be done BEFORE including
 # any other Makefile)
 MAKD_PATH := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
@@ -52,6 +49,15 @@ PKG := $T/pkg
 
 # Load top-level directory local configuration
 -include $T/Config.local.mak
+
+# Directory where all the integration tests are
+ifndef INTEGRATIONTEST
+__dummy_integrationtest_warning := $(shell echo "MakD Warning: The default \
+	location of integration tests (defined by \$$(INTEGRATIONTEST) and 'test' \
+	by default now) will change to 'integrationtest' in v2.0.0. If you want to \
+	avoid this warning, please define it explicitly in your Config.mak." >&2)
+endif
+INTEGRATIONTEST ?= test
 
 # Check flavours
 FLAVOR_IS_VALID_ := $(if $(filter $F,$(VALID_FLAVORS)),1,0)
