@@ -19,7 +19,7 @@ also supported (see under `D2 support`_ for details).
 Versioning
 ----------
 
-MakD complies with `Netptune <https://github.com/sociomantic-tsunami/neptune>`_
+MakD complies with `Neptune <https://github.com/sociomantic-tsunami/neptune>`_
 for versioning.
 
 Support Guarantees
@@ -712,7 +712,7 @@ variable ``FUN``:
                 FUN.desc(OPTS, prolog='A prolog',
                     epilog='And an epilog, but no type')
 
-        Note that ``OPTS['desciption']`` must be defined and hold a non-empty
+        Note that ``OPTS['description']`` must be defined and hold a non-empty
         string.
 
 Generated packages will be stored in the ``$P`` directory (by default
