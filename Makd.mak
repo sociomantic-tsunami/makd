@@ -34,7 +34,7 @@ F ?= devel
 
 # Directory where all the source files are expected (must be a relative paths,
 # use "." for the current directory)
-SRC = src
+SRC ?= src
 
 # Directory were this makefile is located (this must be done BEFORE including
 # any other Makefile)
