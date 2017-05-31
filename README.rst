@@ -19,7 +19,7 @@ also supported (see under `D2 support`_ for details).
 Versioning
 ----------
 
-MakD complies with `Netptune <https://github.com/sociomantic-tsunami/neptune>`_
+MakD complies with `Neptune <https://github.com/sociomantic-tsunami/neptune>`_
 for versioning.
 
 Support Guarantees
@@ -368,6 +368,8 @@ Variables you might want to override
 * ``TEST_RUNNER_MODULE`` and ``TEST_RUNNER_STRING`` are used to override the
   module or string to inject in the unittest file that runs all the unit tests.
   See Testing_ for details.
+* ``INTEGRATIONTEST`` to change the default location of integration tests
+  (``test`` by default).
 * ``SRC`` is where all the source files of your project is expected to be. By
   default is ``src`` but you can override it with ``.`` if you keep the source
   file in the top-level. The path must be relative to the project's top-level
@@ -717,7 +719,7 @@ variable ``FUN``:
                 FUN.desc(prolog='A prolog',
                     epilog='And an epilog, but no type')
 
-        Note that ``OPTS['desciption']`` must be defined and hold a non-empty
+        Note that ``OPTS['description']`` must be defined and hold a non-empty
         string.
 
 Generated packages will be stored in the ``$P`` directory (by default
@@ -915,10 +917,11 @@ you want to add to the file in the ``TEST_RUNNER_STRING`` variable.
 Integration tests
 ~~~~~~~~~~~~~~~~~
 
-Integration tests are expected to live in the ``test/`` directory, and it is
-expected that each subdirectory there is a separate test program, with
-a ``main.d`` file as the entry point. So the typical layout for the ``test/``
-directory is::
+
+Integration tests are expected to live in the ``$(INTEGRATIONTEST)`` directory
+(``test`` by default), and it is expected that each subdirectory there is
+a separate test program, with a ``main.d`` file as the entry point. So the
+typical layout for the ``$(INTEGRATIONTEST)/`` directory is::
 
         test/
              test_1/
@@ -929,7 +932,8 @@ directory is::
                     othermodule.d
 
 The ``integrationtest`` target scan for those individual programs (specifically
-for files with the pattern: ``test/*/main.d``) and builds them and runs them.
+for files with the pattern: ``$(INTEGRATIONTEST)/*/main.d``) and builds them
+and runs them.
 
 It is also expected that the integration tests are slow, so by default they are
 only added to the ``test`` target, but you can manually add them (all or just

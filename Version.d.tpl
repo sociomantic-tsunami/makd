@@ -32,14 +32,14 @@ else
     alias char[] _tpl_istring;
 }
 
-_tpl_istring[_tpl_istring] versionInfo;
+_tpl_istring[_tpl_istring] version_info;
 
 static this()
 {
-    versionInfo["version"] = "@VERSION@";
-    versionInfo["build_date"] = "@DATE@";
-    versionInfo["build_author"] = "@AUTHOR@";
-    versionInfo["compiler"] = "@COMPILER@";
+    version_info["version"] = "@VERSION@";
+    version_info["build_date"] = "@DATE@";
+    version_info["build_author"] = "@AUTHOR@";
+    version_info["compiler"] = "@COMPILER@";
 @LIBRARIES@
     buildPredefinedVersions();
 }
@@ -115,12 +115,12 @@ private template Id (_tpl_istring name)
 {
     version (D_Version2)
     {
-        mixin("static immutable Id = `version (` ~ name ~ `) versionInfo[\"ver_`
+        mixin("static immutable Id = `version (` ~ name ~ `) version_info[\"ver_`
              ~ name ~ `\"] = \"` ~ name ~ `\";`;");
     }
     else
     {
-        const _tpl_istring Id = `version (` ~ name ~ `) versionInfo["ver_` ~ name ~
+        const _tpl_istring Id = `version (` ~ name ~ `) version_info["ver_` ~ name ~
             `"] = "` ~ name ~ `";`;
     }
 }
