@@ -415,6 +415,16 @@ define build_d
 	$(POST_BUILD_D) $3
 endef
 
+# Converts a file path to a D module name. It converts correctly
+# a `pkg/package.d` to just `pkg`.
+# This function accepts 2 arguments:
+# $1 is the file path to convert (required)
+# $2 is the base path of the file (that is not part of the module
+#    specification). By default $C/$(SRC).
+file2module = $(subst /,.,$(patsubst %/package,%,$(patsubst \
+		$(if $2,$2,$C/$(SRC))/%.d,%,$1)))
+
+
 # Overridden and default flags
 ###############################
 
@@ -540,8 +550,7 @@ $O/%unittests.d: $G/build-d-flags
 	$(call exec,printf 'module $(patsubst $O/%.d,%,$@);\n\
 		$(TEST_RUNNER_STRING)\n\
 		\n$(foreach f,$(filter %.d,$^),\
-		import $(subst /,.,$(patsubst $C/$(SRC)/%.d,%,$f));\n)' > \
-			$@,,gen)
+		import $(call file2module,$f);\n)' > $@,,gen)
 
 # Configure dependencies files specific to each special unittests target
 $O/fastunittests: BUILD.d.depfile := $O/fastunittests.mak
@@ -552,15 +561,24 @@ $O/%unittests: $O/%unittests.d $G/build-d-flags
 	$(call build_d,-unittest -debug=UnitTest -version=UnitTest)
 
 # General rule to run the unit tests binaries
+# This gets a little frisky to support pkg/package.d to be able to only pass
+# the modules and packages we are interested to test (the ones present in this
+# project):
+# Te first 2 finds deal with modules (and this includes the `pkg/package.d`
+# case, since it's conceptually a module for D), so we search for files in
+# $C/$(SRC) (and the special case) and we just use file2module to convert it to
+# an appropriate module name.
+# The last find deals with packages/directories, again only top-level, as we
+# use them to pass `-p pkg.` to the unit test runner.
 $O/%unittests.stamp: $O/%unittests
 	$(call exec,$< $(if $(findstring k,$(MAKEFLAGS)),-k) $(if $V,,-v -s) \
-		$(foreach p,$(patsubst %.d,%,$(notdir $(shell \
-			find $T/$(SRC) -maxdepth 1 -mindepth 1 \
-				-name '*.d' -type f \
-			))),-p $p) \
-		$(foreach p,$(notdir $(shell \
-			find $T/$(SRC) -maxdepth 1 -mindepth 1 -type d \
-			)),-p $p.) $(UTFLAGS),$<,run)
+		$(foreach p,$(shell find $C/$(SRC) -maxdepth 1 -mindepth 1 \
+					-name '*.d' -type f; \
+				find $C/$(SRC) -maxdepth 2 -mindepth 1 -wholename '*/package.d' \
+			),-p $(call file2module,$p)) \
+		$(foreach p,$(shell find $C/$(SRC) -maxdepth 1 -mindepth 1 -type d \
+			),-p $(notdir $p).) \
+		$(UTFLAGS),$<,run)
 	$Vtouch $@
 
 # Integration tests rules

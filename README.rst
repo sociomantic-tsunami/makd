@@ -537,6 +537,23 @@ with a lazy variable:
         	$(check_dstep)
         	rdmd --build --whatever.
 
+file2module
+~~~~~~~~~~~
+This function converts a file path to a D module. It takes as first argument
+a file path to convert and as optional second argument the base path of the
+sources (path that is not part of the fully qualified module name), by defaul
+``$C/$(SRC)``. This function takes into account the special ``pkg/package.d``
+module name in D2, converting it to just ``pkg``.
+
+For example:
+
+.. code:: make
+
+        $(call file2module,project/x.d,project/) # -> x
+        $(call file2module,project/y/package.d,project/) # -> y
+        $(call file2module,./some/longer/pkg/package.d,./) # -> some.longer.pkg
+        $(call file2module,./some/longer/pkg/mod.d,./) # -> some.longer.pkg.mod
+
 V
 ~~~
 OK, this is not really a function, but you might use it in a way that can be
