@@ -778,14 +778,18 @@ passed to the ``mkpkg`` util. By default Makd passes the following variables:
 variable ``FUN``:
 
 ``autodeps(bin[, ...][, path=''])``
-        returns a sorted ``list()`` of packages ``bin`` depends on based on the
-        outcome of running the ``ldd`` utility and searching to which packages
-        the libraries is linked belong to using ``dpkg``. You can specify
-        multiple binaries to get a list of dependencies for all of them. This
-        function is tightly coupled to Debian packages for now. If a ``path``
-        is given, then all the ``bin`` passed will be prepended with this
-        ``path``. ``bin``\ s can be passed as multiple arguments or as one
-        list.
+        returns a sorted ``list()`` of dependencies (packages with versions)
+        ``bin`` depends on based on the outcome of running the
+        ``dpkg-shlibdeps`` utility in a minimal bogus debian package
+        environment. This tools comes in the ``dpkg-dev`` package, so make sure
+        you have it installed if you use this function. You can specify
+        multiple binaries to get a list of dependencies for all of them, and if
+        a single package provides multiple binaries you should do **one
+        single** ``autodeps()`` call for all of them to avoid getting
+        duplicates. This function is tightly coupled to Debian packages for
+        now. If a ``path`` is given, then all the ``bin`` passed will be
+        prepended with this ``path``. ``bin``\ s can be passed as multiple
+        arguments or as one list.
 ``mapfiles(src, dst, file[, ...][, append_suffix=True])``
         A very simple function that just returns a list with
         ``{src}/{file}={dst}/{file}{VAR.suffix}`` for each ``file`` passed.
