@@ -209,6 +209,12 @@ class Package:
         args = []
         for k, v in self.options.items():
             k = k.replace('_', '-')
+            if v is True:
+                if len(k) == 1:
+                    args.append('-'+k)
+                else:
+                    args.append('--'+k)
+                continue
             if len(k) == 1:
                 fmt = '-{}{}'
             else:
