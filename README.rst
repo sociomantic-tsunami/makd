@@ -642,10 +642,12 @@ These files are expected to be Python scripts defining two variables:
         a fpm_ command-line option. If the key is only one character (for
         example ``c``), it will be passed as ``-<key><value>`` and if it's
         more, it will be passed as ``--<key>=<value>`` (``_`` characters in the
-        key will be replaced by ``-`` for convenience). The ``<value>`` can be a
-        string or an array of strings. In the latter case, the key is used as fpm_
-        flag for each item in ``<value>``. No validation is performed over the
-        keys or values, they are just passed blindly to fpm_.
+        key will be replaced by ``-`` for convenience). The ``<value>`` can be
+        ``True``, a string or an array of strings. If it's ``True``, just
+        ``-<key>`` or ``--<key>`` is passed (without an actual value), if it's
+        an array of strings, the key is used as fpm_ flag for each item in
+        ``<value>``. No validation is performed over the keys or values, they
+        are just passed blindly to fpm_.
 
 ``ARGS``
         a ``list()`` (array) to pass to fpm_ as positional arguments (usually the
