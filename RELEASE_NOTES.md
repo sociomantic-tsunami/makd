@@ -25,6 +25,10 @@ New Features
 
   The location of the `d1to2fix` binary can now be overriden via the ``D1TO2FIX`` variable and the directories where the tool will look for source files too, via the `D1TO2FIX_DIRS` variable.
 
+* `file2module`
+
+  This new MakD function converts a file path to a D module. It takes as first argument a file path to convert and as optional second argument the base path of the sources (path that is not part of the fully qualified module name), by defaul `$C/$(SRC)`. This function takes into account the special `pkg/package.d` module name in D2, converting it to just `pkg`.
+
 Deprecations
 ============
 
