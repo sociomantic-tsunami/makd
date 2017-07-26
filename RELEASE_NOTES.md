@@ -19,6 +19,8 @@ New Features
 
   There is a new MakD function to get fancy output but that doesn't force colors on the output of the commands that are being run. This is particularly useful for commands that already have colorized output.
 
+  This function is now used when invoking `dmd` when `DVER` is 2, so dmd colored output will work as expected.
+
 Deprecations
 ============
 
