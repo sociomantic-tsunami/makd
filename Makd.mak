@@ -403,7 +403,8 @@ check_deb = $Vi=`apt-cache policy $1 | grep Installed | cut -b14-`; \
 # 3: arguments to be passed to the $(POST_BUILD_D) script
 define build_d
 	$(PRE_BUILD_D) $2
-	$(call exec,$(BUILD.d) --build-only $1 $(LOADLIBES) $(LDLIBS) -of$@ \
+	$(call $(if $(subst 2,,$(DVER)),exec,exec_nc),\
+		$(BUILD.d) --build-only $1 $(LOADLIBES) $(LDLIBS) -of$@ \
 		$(firstword $(filter %.d,$^)))
 	$(POST_BUILD_D) $3
 endef
