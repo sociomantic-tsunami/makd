@@ -298,20 +298,31 @@ abbr = $(if $(call eq,$(call abbr_helper,$1),$1),$1,$(addprefix \
 vexec_pc = $(if $1,\033[$1m%s\033[00m,%s)
 vexec_p = $(if $(COLOR), \
 	'   $(call vexec_pc,$(COLOR_CMD)) $(call vexec_pc,$(COLOR_ARG))\n$(if \
-			$(COLOR_OUT),\033[$(COLOR_OUT)m)', \
+			$1,\033[$1m)', \
 	'   %s %s\n')
 # Execute a command printing a nice message if $V is @.
 # $1 is mandatory and it's the command to execute.
 # $2 is the target name (defaults to $@).
 # $3 is the command name (defaults to the first word of $1).
-vexec = $(if $V,printf $(vexec_p) \
+# $4 should be empty to force non-colorized output
+vexec = $(if $V,printf $(call vexec_p,$4) \
 		'$(call abbr,$(if $3,$(strip $3),$(firstword $1)))' \
 		'$(call abbr,$(if $2,$(strip $2),$@))' ; )$1 \
-		$(if $(COLOR),$(if $(COLOR_OUT), ; r=$$? ; \
+		$(if $(COLOR),$(if $4, ; r=$$? ; \
 				printf '\033[00m' ; exit $$r))
 
 # Same as vexec but it silence the echo command (prepending a @ if $V).
-exec = $V$(call vexec,$1,$2,$3)
+# $1 is mandatory and it's the command to execute.
+# $2 is the target name (defaults to $@).
+# $3 is the command name (defaults to the first word of $1).
+exec = $V$(call vexec,$1,$2,$3,$(COLOR_OUT))
+
+# Same as exec but forcing non-colored output (useful for commands that are
+# already colorized)
+# $1 is mandatory and it's the command to execute.
+# $2 is the target name (defaults to $@).
+# $3 is the command name (defaults to the first word of $1).
+exec_nc = $V$(call vexec,$1,$2,$3)
 
 # Concatenate variables together.  The first argument is a list of variables
 # names to concatenate.  The second argument is an optional prefix for the
