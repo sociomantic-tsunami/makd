@@ -481,6 +481,15 @@ This will print::
 When built. And will print ``touch -m touch-file`` if ``V=1`` is used, as
 expected.
 
+exec_nc
+~~~~~~~
+When ``COLOR`` is enabled, ``exec`` will colorize the output based on the
+``COLOR_OUT`` variable. For commands that use colors in the output themselves,
+having MakD coloring the output will just make the output weird. Because of
+this, there is this flavour of ``exec`` that will not colorize the output (but
+will still use colors, when enabled, for the fancy progress indication).
+
+
 build_d
 ~~~~~~~
 

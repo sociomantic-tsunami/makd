@@ -15,6 +15,10 @@ New Features
 
 * Now the location of integrationtest is configurable through the ``INTEGRATIONTEST`` Make variable.
 
+* `exec_nc`
+
+  There is a new MakD function to get fancy output but that doesn't force colors on the output of the commands that are being run. This is particularly useful for commands that already have colorized output.
+
 Deprecations
 ============
 
