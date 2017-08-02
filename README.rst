@@ -360,7 +360,8 @@ Variables you might want to override
 * ``P`` is where built packages will be created. Defaults to ``$G/pkg``.
 * Program location variables: ``DC`` is the D compiler to use, you can build
   your project with a different DMD by using ``make
-  DC=/usr/bin/experimental-dmd`` for example. Same for ``RDMD`` and ``FPM``.
+  DC=/usr/bin/experimental-dmd`` for example. Same for ``RDMD``, ``D1TO2FIX``
+  and ``FPM``.
 * ``D_GC`` to change the default (cdgc) GC implementation to use.
 * Less likely you might want to override the ``DFLAGS``, ``RDMDFLAGS`` or
   ``FPMFLAGS``, but usually there are better methods to do that instead.
@@ -371,6 +372,9 @@ Variables you might want to override
   See Testing_ for details.
 * ``INTEGRATIONTEST`` to change the default location of integration tests
   (``test`` by default).
+* ``D1TO2FIX_DIRS`` can be used to specify which directories to look for
+  D files to be converted to D2 via the ``d2conv`` target. By default ``$C`` is
+  used (i.e. the project's root).
 * ``SRC`` is where all the source files of your project is expected to be. By
   default is ``src`` but you can override it with ``.`` if you keep the source
   file in the top-level. The path must be relative to the project's top-level

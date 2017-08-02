@@ -131,6 +131,9 @@ HMOD ?= hmod
 # harbored-mod flags
 HMODFLAGS ?= --project-name $(PROJECT_NAME) --project-version $(VERSION)
 
+# Default d1to2fix binary location
+D1TO2FIX ?= d1to2fix
+
 # Default fpm binary location
 FPM ?= fpm
 
@@ -266,6 +269,9 @@ PKGVERSION := $(shell echo $(VERSION) | \
 # For more information refer to the documentation:
 # http://www.gnu.org/software/make/manual/make.html#Text-Functions
 TEST_FILTER_OUT := $C/$(SRC)/%/main.d
+
+# Directories to search for files to convert using d1to2fix
+D1TO2FIX_DIRS := $C
 
 
 # Functions
@@ -686,12 +692,12 @@ fasttest: $(fasttest)
 .PHONY: d2conv
 d2conv: $O/d2conv.stamp
 
-$O/d2conv.stamp: $C
-	$Vfind $C -type f -regex '^.+\.d$$' > $@
-ifeq "$(shell d1to2fix --help 2>/dev/null | grep -- --input)" ""
-	$(call exec, d1to2fix --fatal `cat $@`)
+$O/d2conv.stamp: $(D1TO2FIX_DIRS)
+	$Vfind $(D1TO2FIX_DIRS) -type f -regex '^.+\.d$$' > $@
+ifeq "$(shell $(D1TO2FIX) --help 2>/dev/null | grep -- --input)" ""
+	$(call exec, $(D1TO2FIX) --fatal `cat $@`)
 else
-	$(call exec, d1to2fix $(DIMPORTPATHS) --fatal --input=$@)
+	$(call exec, $(D1TO2FIX) $(DIMPORTPATHS) --fatal --input=$@)
 endif
 
 # Automatic dependency handling
