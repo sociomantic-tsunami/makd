@@ -21,6 +21,10 @@ New Features
 
   This function is now used when invoking `dmd` when `DVER` is 2, so dmd colored output will work as expected.
 
+* `d2conv`
+
+  The location of the `d1to2fix` binary can now be overriden via the ``D1TO2FIX`` variable and the directories where the tool will look for source files too, via the `D1TO2FIX_DIRS` variable.
+
 Deprecations
 ============
 
