@@ -1,6 +1,10 @@
 New Features
 ============
 
+* `make example` / `example-run`
+
+  Added new make targets `example` and `example-run`. These targets will search for example programs in the `example/` directory similarly with how unit tests are searched for in the `test/` directory. Please consult the README for details.
+
 * `VAR.fullname` `VAR.shortname`
 
   Added new variables, available in package definition files. `VAR.fullname` replaces the old `VAR.name` to make it more explicit, `VAR.shortname` contains only the package name, without the `VAR.suffix`.

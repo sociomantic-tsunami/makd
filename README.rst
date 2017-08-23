@@ -270,6 +270,8 @@ whole set of predefined targets are:
 * ``allunittest``
 * ``fastunittest``
 * ``integrationtest``
+* ``example``
+* ``example-run``
 * ``doc``
 * ``pkg``
 * ``graph-deps``
@@ -289,6 +291,19 @@ The ``fasttest`` target will only run the ``fastunittest`` target by default,
 but you can add more too by using the ``fasttest`` special variable.
 
 See the Testing_ section for more details.
+
+The ``example`` target will compile example programs found in
+``$(EXAMPLE)/*/*.d`` (``example/`` by default) in a similar fashion to what
+``integrationtest`` does. An example can be skipped by adding the file to the
+``$(EXAMPLE_FILTER_OUT)`` variable. Check `Skipping tests`_ section for
+a similar example of filtering out files. Examples are built as part of the
+``test`` target by default, but they are not ran, as they could expect user
+input or have other limitations that might not be suitable for general testing.
+An ``example-run`` target is provided, though, in case you want to run all
+examples manually. You can use the ``EXAMPLEFLAGS`` variable to pass custom
+arguments to the example programs when running them, look at the `Adding
+specific flags`_ section for details on how to use ``EXAMPLEFLAGS`` as you
+would do with ``UTFLAGS``.
 
 The ``pkg`` target builds all packages defined in ``$P``, see Packaging_
 section for more details.
@@ -367,11 +382,15 @@ Variables you might want to override
   ``FPMFLAGS``, but usually there are better methods to do that instead.
 * ``TEST_FILTER_OUT`` to exclude some files from the unit tests or integration
   tests.
+* ``EXAMPLE_FILTER_OUT`` to exclude some examples from being built with the
+  ``example`` and ``test`` targets.
 * ``TEST_RUNNER_MODULE`` and ``TEST_RUNNER_STRING`` are used to override the
   module or string to inject in the unittest file that runs all the unit tests.
   See Testing_ for details.
 * ``INTEGRATIONTEST`` to change the default location of integration tests
   (``test`` by default).
+* ``EXAMPLE`` to change the default location of the example programs
+  (``example/`` by default).
 * ``D1TO2FIX_DIRS`` can be used to specify which directories to look for
   D files to be converted to D2 via the ``d2conv`` target. By default ``$C`` is
   used (i.e. the project's root).

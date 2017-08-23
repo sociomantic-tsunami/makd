@@ -59,6 +59,9 @@ __dummy_integrationtest_warning := $(shell echo "MakD Warning: The default \
 endif
 INTEGRATIONTEST ?= test
 
+# Default location to look for examples
+EXAMPLE ?= example
+
 # Check flavours
 FLAVOR_IS_VALID_ := $(if $(filter $F,$(VALID_FLAVORS)),1,0)
 ifeq ($(FLAVOR_IS_VALID_),0)
@@ -592,6 +595,43 @@ $O/test-%: $T/$(INTEGRATIONTEST)/%/main.d $G/build-d-flags
 # General rule to Run the test suite binaries
 $O/test-%.stamp: $O/test-%
 	$(call exec,$< $(ITFLAGS),$<,run)
+	$Vtouch $@
+
+# Rule to build examples
+#########################
+#
+# Examples are assumed to be standalone programs. Like with integration tests,
+# we just search for files $(EXAMPLE)/%/main.d and assume they are the entry point of
+# the program (and each subdirectory in $(EXAMPLE)/ is a separate
+# example program).
+# The sources list is filtered through the $(EXAMPLE_FILTER_OUT) variable contents
+# (using the Make function $(filter-out)), so you can exclude an example program
+# by adding the location of the main.d (as an absolute path using $C) by
+# adding it to this variable.
+# The target example builds all example programs.
+.PHONY: example
+example: $(patsubst $T/$(EXAMPLE)/%/main.d,$O/example-%,\
+		$(filter-out $(EXAMPLE_FILTER_OUT),\
+		$(wildcard $T/$(EXAMPLE)/*/main.d)))
+
+# Add example building as part of the test target, as they are a way to test no
+# breaking changes are introduced
+test += example
+
+# General rule to build example programs, this is the same as building any
+# other binary but including unittests too.
+$O/example-%: BUILD.d.depfile = $O/example-$*.mak
+$O/example-%: $T/$(EXAMPLE)/%/main.d $G/build-d-flags
+	$(call build_d,-unittest -debug=UnitTest -version=UnitTest)
+
+# General rule to run all examples. Arguments can be passed to individual
+# examples via EXAMPLEFLAGS
+.PHONY: example-run
+example-run: $(patsubst $T/$(EXAMPLE)/%/main.d,$O/example-%.stamp,\
+		$(filter-out $(EXAMPLE_FILTER_OUT),\
+		$(wildcard $T/$(EXAMPLE)/*/main.d)))
+$O/example-%.stamp: $O/example-%
+	$(call exec,$< $(EXAMPLEFLAGS),$<,run)
 	$Vtouch $@
 
 # Documentation rules
