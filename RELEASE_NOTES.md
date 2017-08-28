@@ -40,9 +40,8 @@ Deprecations
 
 * `FUN.mapbins()` is deprecated, please use `FUN.mapfiles()` instead.
 
-* The `versionInfo` AA containing all the automatically deduced version
-  information is deprecated, please use `version_info` instead.
+* The `versionInfo` AA containing all the automatically deduced version information is deprecated, please use `version_info` instead.
 
 * The default location for integration tests (now defined by ``$(INTEGRATIONTEST)``, will change from `test` to `integrationtest` (see #74). To avoid warnings you can preempively define the variable explicitly (in which case we recommend to start using the new default location instead of the old one: `INTEGRATIONTEST := integrationtest` in `Config.mak`).
 
-Milestone: https://github.com/sociomantic-tsunami/makd/milestone/20?closed=1
+Milestone: https://github.com/sociomantic-tsunami/makd/milestone/26?closed=1
