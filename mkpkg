@@ -136,7 +136,7 @@ Package: bogus
 Architecture: any
 Depends: ${misc:Depends} ${shlibs:Depends}
 ''')
-            cmd = ['dpkg-shlibdeps'] + binaries
+            cmd = ['dpkg-shlibdeps', '--ignore-missing-info'] + binaries
             try:
                 debugf("dpkg_autodeps: Running command: {}", cmd)
                 output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
