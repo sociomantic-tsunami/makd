@@ -1,2 +1,2 @@
-* The `Version` alias to `versionInfo` provided by the `Version` module has been removed.
-  All remaining usage can be replaced with `versionInfo`.
+* Both `Version` and `versionInfo` aliases provided by the `Version` module have been removed.
+  All remaining usage should be replaced with `version_info`.
