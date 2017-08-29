@@ -52,10 +52,12 @@ PKG := $T/pkg
 
 # Directory where all the integration tests are
 ifndef INTEGRATIONTEST
+ifeq ($(if $(wildcard test/*/main.d),yes),yes)
 __dummy_integrationtest_warning := $(shell echo "MakD Warning: The default \
 	location of integration tests (defined by \$$(INTEGRATIONTEST) and 'test' \
 	by default now) will change to 'integrationtest' in v2.0.0. If you want to \
 	avoid this warning, please define it explicitly in your Config.mak." >&2)
+endif
 endif
 INTEGRATIONTEST ?= test
 
