@@ -1,6 +1,6 @@
 * Unit and integration tests changes
 
-  * Starting with v2.0.0 Makd will compile all modules from integration tests as part of the regular unittest target and stop supplying the `-unittest` flag when compiling actual integration tests. This may break compilation of a project so some manual tweaks are required:
+  * Starting with v2.0.0 Makd will compile all modules from integration tests as part of the regular unittest target and stop supplying the `-unittest -version=UnitTest -debug=UnitTest` flags when compiling actual integration tests. This may break compilation of a project so some manual tweaks are required:
 
     1. If integration test modules don't have module statements or multiple modules have the same name.
 
@@ -9,6 +9,8 @@
     2. As with modules containing a `main()` in the regular user code in `$(SRC)`, integration test modules containing `main()` functions need to be modified to version out that `main()` function via `version(UnitTest)` (see the notes about changes to test and `main()` in general for more details about this), otherwise the unittest target will fail to link because of multiple `main()`s.
 
        Again, you could manually add these modules to `TEST_FILTER_OUT`, but it is not recommended as any unit tests present in the module with the `main()` function won't be run this way.
+
+    3. If you used `version(UnitTest)` or `debug(UnitTest)` blocks incorrectly (to `import` modules that are needed outside `unittest` too), you might get weird import errors.
 
   * Integration tests default location changed from `test` to `integrationtest`
 
