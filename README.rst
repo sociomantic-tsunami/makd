@@ -555,6 +555,19 @@ with a lazy variable:
         	$(check_dstep)
         	rdmd --build --whatever.
 
+find
+~~~~
+Wrapper around the ``find`` command to avoid errors when the directory to
+search doesn't exist at all. Use this to avoid spurious `find` errors.
+
+It takes the directory/ies where to search as first arguments and conditions and other `find` options as the second argument.
+
+Example:
+
+.. code:: make
+
+  files := $(call find $C/$(SRC),-name '*.di')
+
 find_files
 ~~~~~~~~~~
 Find files and get the their file names relative to another directory.
