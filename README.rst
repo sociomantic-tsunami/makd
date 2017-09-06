@@ -555,6 +555,25 @@ with a lazy variable:
         	$(check_dstep)
         	rdmd --build --whatever.
 
+find_files
+~~~~~~~~~~
+Find files and get the their file names relative to another directory.
+
+Arguments are:
+
+1. The files suffix (``.h`` or ``.cpp`` for example).
+2. A directory rewrite, the matched files will be rewriten to be in the
+   directory specified in this argument (it defaults to ``$3`` if omitted).
+3. Where to search for the files (``$C`` if omitted).
+4. A ``filter-out`` pattern applied over the original file list (previous to
+   the rewrite). It can be empty, which has no effect (nothing is filtered).
+
+Example:
+
+.. code:: make
+
+  UNITTEST_FILES := $(call find_files,.d,,$C/$(SRC),$(TEST_FILTER_OUT))
+
 file2module
 ~~~~~~~~~~~
 This function converts a file path to a D module. It takes as first argument
