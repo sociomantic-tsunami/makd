@@ -288,7 +288,7 @@ find = $(foreach d,$1,$(if $(shell test -d "$d" && echo true),\
 # $4 is a `filter-out` pattern applied over the original file list (previous to
 #    the rewrite). It can be empty, which has no effect (nothing is filtered).
 find_files = $(patsubst $(if $3,$3,$C)/%$1,$(if $2,$2,$(if $3,$3,$C))/%$1, \
-		$(filter-out $4,$(call find $(if $3,$3,$C),-name '*$1')))
+		$(filter-out $4,$(call find,$(if $3,$3,$C),-name '*$1')))
 
 # Abbreviate a file name. Cut the leading part of a file if it match to the $T
 # directory, so it can be displayed as if it were a relative directory. Take
@@ -574,12 +574,12 @@ $O/%unittests: $O/%unittests.d $G/build-d-flags
 # use them to pass `-p pkg.` to the unit test runner.
 $O/%unittests.stamp: $O/%unittests
 	$(call exec,$< $(if $(findstring k,$(MAKEFLAGS)),-k) $(if $V,,-v -s) \
-		$(foreach p,$(call find $C/$(SRC),-maxdepth 1 -mindepth 1 \
+		$(foreach p,$(call find,$C/$(SRC),-maxdepth 1 -mindepth 1 \
 					-name '*.d' -type f) \
-				$(call find $C/$(SRC),-maxdepth 2 -mindepth 1 \
+				$(call find,$C/$(SRC),-maxdepth 2 -mindepth 1 \
 					-wholename '*/package.d'), \
 			-p $(call file2module,$p)) \
-		$(foreach p,$(call find $C/$(SRC),-maxdepth 1 -mindepth 1 -type d \
+		$(foreach p,$(call find,$C/$(SRC),-maxdepth 1 -mindepth 1 -type d \
 			),-p $(notdir $p).) \
 		 -p $(call file2module,$(INTEGRATIONTEST)). $(UTFLAGS),$<,run)
 	$Vtouch $@
@@ -656,7 +656,7 @@ $O/example-%.stamp: $O/example-%
 ######################
 
 # General rule to run the harbored-mod generator
-$O/doc.stamp: $(call find $(SRC),-type f \( -name '*.d' -o -name '*.di' \))
+$O/doc.stamp: $(call find,$(SRC),-type f \( -name '*.d' -o -name '*.di' \))
 	$(call exec,$(HMOD) -o $D $(HMODFLAGS) $(SRC) >/dev/null,doc)
 	$Vtouch $@
 
@@ -685,7 +685,7 @@ $O/depsfile: $O/allunittests.d
 # directory.
 setup_build_dir__ := $(shell \
 	mkdir -p $O $B $D $(GS) $P $(addprefix $O,$(patsubst $T%,%,\
-		$(call find $T,-type d $(foreach d,$(BUILD_DIR_EXCLUDE), \
+		$(call find,$T,-type d $(foreach d,$(BUILD_DIR_EXCLUDE), \
 			-not -path '$T/$d' -not -path '$T/$d/*' \
 			-not -path '$T/*/$d' -not -path '$T/*/$d/*')))); \
 	rm -f $(VD)/last && ln -s $F $(VD)/last )
@@ -762,6 +762,6 @@ endif
 ################################
 
 # These files are created during compilation.
--include $(call find $O,-name '*.mak')
+-include $(call find,$O,-name '*.mak')
 
 endif
