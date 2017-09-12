@@ -456,6 +456,7 @@ ifneq ($(VERSION_FILE),)
 # Updates the git version information
 PRE_BUILD_D = $V$(MAKD_PATH)/mkversion.sh -o $(VERSION_FILE) \
 		-m $(subst /,.,$(patsubst $(GS)/%.d,%,$(VERSION_FILE))) \
+		-f "$F" -F "$(DFLAGS)" \
 		$(MAKD_PATH)/Version.d.tpl $(SUBMODULES)
 # Removes the Vesion.d file from the generated dependencies (so files don't get
 # rebuilt just because the version file changed)

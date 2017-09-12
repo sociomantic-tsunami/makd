@@ -46,6 +46,8 @@ static this()
     version_info["build_date"] = "@DATE@";
     version_info["build_author"] = "@AUTHOR@";
     version_info["compiler"] = "@COMPILER@";
+    version_info["dflags"] = "@DFLAGS@";
+    version_info["flavour"] = "@FLAVOUR@";
 @LIBRARIES@
     buildPredefinedVersions();
 }
