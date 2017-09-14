@@ -268,6 +268,31 @@ TEST_FILTER_OUT :=
 D1TO2FIX_DIRS := $C
 
 
+# Code coverage
+################
+
+# Set to 1 to compile with code coverage
+COV ?= 0
+
+# Set where to put the coverage reports
+COVDIR ?= $O/cov
+
+# Set merging of coverage reports
+COVMERGE ?= 1
+
+# Configure environment for coverage
+ifeq ($(COV),1)
+    override DFLAGS += -cov
+    ifeq ($(DVER),1)
+        DRT_COVMERGE ?= $(COVMERGE)
+        export DRT_COVMERGE
+        DRT_COVDSTPATH ?= $(COVDIR)
+        export DRT_COVDSTPATH
+    else # DVER is 2
+		override _test_drt_opts := --DRT-covopt="merge:$(COVMERGE) dstpath:$(COVDIR)"
+    endif
+endif
+
 # Functions
 ############
 
@@ -480,6 +505,12 @@ $B/%: $G/build-d-flags
 clean:
 	$(call exec,$(RM) -r $(VD) $(clean),$(VD) $(clean))
 
+# Clean the coverage reports directory, useful to re-run and collect new stats
+.PHONY: clean-cov
+clean-cov:
+	$(call exec,$(RM) -r $(COVDIR))
+	$Vmkdir -p $(COVDIR)
+
 
 # Target to build a package based on the fpm definition (old packages are
 # removed to avoid infinite pollution of the build directory, as every package
@@ -582,7 +613,8 @@ $O/%unittests.stamp: $O/%unittests
 			-p $(call file2module,$p)) \
 		$(foreach p,$(call find,$C/$(SRC),-maxdepth 1 -mindepth 1 -type d \
 			),-p $(notdir $p).) \
-		 -p $(call file2module,$(INTEGRATIONTEST)). $(UTFLAGS),$<,run)
+		-p $(call file2module,$(INTEGRATIONTEST)). $(UTFLAGS) \
+		$(_test_drt_opts),$<,run)
 	$Vtouch $@
 
 # Integration tests rules
@@ -613,7 +645,7 @@ $O/test-%: $T/$(INTEGRATIONTEST)/%/main.d $G/build-d-flags
 
 # General rule to Run the test suite binaries
 $O/test-%.stamp: $O/test-%
-	$(call exec,$< $(ITFLAGS),$<,run)
+	$(call exec,$< $(_test_drt_opts) $(ITFLAGS),$<,run)
 	$Vtouch $@
 
 # Rule to build examples
@@ -685,7 +717,7 @@ $O/depsfile: $O/allunittests.d
 # project into $O. Create one symbolic link "last" to the current build
 # directory.
 setup_build_dir__ := $(shell \
-	mkdir -p $O $B $D $(GS) $P $(addprefix $O,$(patsubst $T%,%,\
+	mkdir -p $O $O/cov $B $D $(GS) $P $(addprefix $O,$(patsubst $T%,%,\
 		$(call find,$T,-type d $(foreach d,$(BUILD_DIR_EXCLUDE), \
 			-not -path '$T/$d' -not -path '$T/$d/*' \
 			-not -path '$T/*/$d' -not -path '$T/*/$d/*')))); \
