@@ -419,6 +419,9 @@ Variables you might want to override
   running the command to build D targets (when using the ``build_d`` function).
   By default they are used to generate the ``Version.d`` file, but users can
   override it not to generate the file or do something else on top of that.
+* ``COV`` will compile and run tests with coverage support if is set to ``1``. Please see Coverage_ for details.
+* ``COVDIR`` specifies the directory where to store coverage reports (by default ``$O/cov``. Please see Coverage_ for details.
+* ``COVMERGE`` indicates if coverage reports should be merged (``1`` will merge, ``0`` will not). Please see Coverage_ for details.
 
 Some of this variables are typically overridden in the Config.mak_ file, others
 in the Build.mak_ file, others in the Config.local.mak_ or directly in the
@@ -1170,3 +1173,31 @@ be re-compiled in that case!
 
 .. _Makeit: https://git.llucax.com/w/software/makeit.git
 .. _fpm: https://github.com/jordansissel/fpm
+
+
+Coverage
+--------
+
+Compiling using code coverage can be done by passing ``COV=1`` to ``make``. If
+the D runtime supports the ``DRT_COV*`` environment variables (see list of
+version below), the coverage reports will be put in the ``$(COVDIR)`` directory
+(``$O/cov`` by default), otherwise they will be written in the top-level
+directory.
+
+Also by default the the coverage reports will be merged. To change this you can
+override the ``$(COVMERGE)`` environment variable (``1`` to merge,
+``0`` to overwrite). This also only works for the versions specified
+below, previous versions will always overwrite the reports on each
+run.
+
+You should be **careful about report merging**, as unless you clean the reports
+manually, they will be accumulated ad infinitum as there is no obvious point
+where reports can be cleaned automatically (except for ``make clean`` of
+course). There is a convenience target to just clean coverage reports:
+``clean-cov``.
+
+Merging and overrideable dirirectory versions:
+
+* ``dmd1``: tangort v1.8.0+
+* ``dmd-transitional``: v2.070.2.s15+ and v2.071.2.s4+
+* ``dmd``: v2.078.0+
