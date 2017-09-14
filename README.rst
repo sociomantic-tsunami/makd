@@ -1101,3 +1101,15 @@ be re-compiled in that case!
 .. _Makeit: https://git.llucax.com/w/software/makeit.git
 .. _fpm: https://github.com/jordansissel/fpm
 
+
+Coverage
+--------
+
+Compiling using code coverage can be done by passing ``COV=1`` to ``make``. If
+the D compiler supports the ``DRT_COV*`` environment variables (dmd 1.081+ and
+2.077+), the coverage reports will be put in the ``$O/cov`` directory (it can
+be overridden by setting the ``DRT_COVDSTPATH`` directly), otherwise they will
+be written in the top-level directory.
+
+Also by default the the coverage reports will be merged. To change this you can
+override the ``DRT_COVMERGE`` environment variable directly.

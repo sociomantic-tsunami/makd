@@ -279,6 +279,22 @@ TEST_FILTER_OUT := $C/$(SRC)/%/main.d
 D1TO2FIX_DIRS := $C
 
 
+# Code coverage
+################
+
+# Set to 1 to compile with code coverage
+COV ?= 0
+
+# Configure environment for coverage
+ifeq ($(COV),1)
+override DFLAGS += -cov
+DRT_COVMERGE ?= 1
+export DRT_COVMERGE
+DRT_COVDSTPATH ?= $O/cov
+export DRT_COVDSTPATH
+endif
+
+
 # Functions
 ############
 
@@ -687,7 +703,7 @@ $O/depsfile: $O/allunittests.d
 # project into $O. Create one symbolic link "last" to the current build
 # directory.
 setup_build_dir__ := $(shell \
-	mkdir -p $O $B $D $(GS) $P $(addprefix $O,$(patsubst $T%,%,\
+	mkdir -p $O $O/cov $B $D $(GS) $P $(addprefix $O,$(patsubst $T%,%,\
 		$(shell find $T -type d $(foreach d,$(BUILD_DIR_EXCLUDE), \
 			-not -path '$T/$d' -not -path '$T/$d/*' \
 			-not -path '$T/*/$d' -not -path '$T/*/$d/*')))); \
