@@ -58,7 +58,7 @@ do
 done
 shift `expr $OPTIND - 1`
 
-version=`git describe --dirty --always`
+version=`git describe --dirty --always --abbrev=7`
 # Add branch name if we only got a hash
 echo "$version" | egrep -q '^[0-9a-f]{7}(-dirty)?$'  &&
     version=`git rev-parse --abbrev-ref HEAD`-g"$version"
@@ -96,7 +96,7 @@ for lib in "$@"
 do
     lib_base=`basename $lib`
 
-    ver_desc=`cd $lib && git describe --dirty --always`
+    ver_desc=`cd $lib && git describe --dirty --always --abbrev=7`
     # Add branch name if we only got a hash
     echo "$ver_desc" | egrep -q '^[0-9a-f]{7}(-dirty)?$'  &&
         ver_desc=`cd $lib && git rev-parse --abbrev-ref HEAD`-g"$ver_desc"
