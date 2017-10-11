@@ -123,6 +123,12 @@ HMOD ?= hmod
 # harbored-mod flags
 HMODFLAGS ?= --project-name $(PROJECT_NAME) --project-version $(VERSION)
 
+# Default code-formatter (dfmt)
+DFMT ?= dfmt
+
+# dfmt flags
+DFMTFLAGS ?= --space_before_function_parameters=true
+
 # Default d1to2fix binary location
 D1TO2FIX ?= d1to2fix
 
@@ -661,6 +667,17 @@ $O/doc.stamp: $(call find,$(SRC),-type f \( -name '*.d' -o -name '*.di' \))
 	$Vtouch $@
 
 doc += $O/doc.stamp
+
+# Formatter rules
+###################
+
+# General rule to run the dfmt formatter 
+$O/dfmt.stamp: $(shell mkdir -p formatted)
+	$(shell find $(SRC) -type f \( -name '*.d' -o -name '*.di' \))
+	$(call exec,$(DFMT) $(DFMTFLAGS) $(SRC) > formatted/$(SRC) ,fmt)
+	$Vtouch $@
+
+dfmt += $O/dfmt.stamp
 
 # Graph dependencies rule
 ##########################
