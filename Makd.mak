@@ -151,6 +151,9 @@ PKGTYPE ?= deb
 # Default flags to pass to graph-deps (see --help for details)
 GRAPH_DEPS_FLAGS ?= -c -C
 
+# Packages files to build. Each file builds a different package.
+PKG_FILES ?= $(wildcard $(PKG)/*.pkg)
+
 # Default fpm flags. By default it builds Debian packages from files, a Debian
 # changelog is provided, and a version and iteration (using the Debian version)
 # (defined lazily so we can use target variables)
@@ -485,9 +488,6 @@ $B/%: $G/build-d-flags
 clean:
 	$(call exec,$(RM) -r $(VD) $(clean),$(VD) $(clean))
 
-# Phony target to build all packages
-.PHONY: pkg
-pkg: $(patsubst $(PKG)/%.pkg,$O/pkg-%.stamp,$(wildcard $(PKG)/*.pkg))
 
 # Target to build a package based on the fpm definition (old packages are
 # removed to avoid infinite pollution of the build directory, as every package
@@ -744,6 +744,11 @@ test: $(test)
 # to build and run tests to the $(fasttest) variable).
 .PHONY: fasttest
 fasttest: $(fasttest)
+
+# Phony rule to build all packages
+pkg += $(patsubst $(PKG)/%.pkg,$O/pkg-%.stamp,$(PKG_FILES))
+.PHONY: pkg
+pkg: $(pkg)
 
 
 # Temporary rule to convert code from D1 to D2
