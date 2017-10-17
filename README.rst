@@ -404,6 +404,7 @@ Variables you might want to override
 * ``PKG`` is where package definitions are searched. When building packages,
   each ``*.pkg`` file in that directory will be built. By default ``$T/pkg``.
 * ``PKG_DEFAULTS`` contains the default options passed to ``mkpkg``.
+* ``PKG_FILES`` contains the list of packages definitions.
 * ``PKG_PREBUILD`` hold commands to run previous to build packages.
 * ``PROJECT_NAME`` contains the name of the project, used in documentation
   generatation. It defaults to the name of the top directory.
@@ -683,9 +684,13 @@ Packaging
 
 Makd supports a simple facility to make packages based on fpm_.  A simple
 wrapper program ``mkpkg`` is provided to ease the creation of scripts that use
-fpm_ to create packages.  The predefined ``pkg`` target will scan for ``*.pkg``
-files in the ``$(PKG)`` directory (by default ``$T/pkg``) and then invoke
-``mkpkg`` with them.
+fpm_ to create packages.
+The predefined ``pkg`` target depends on the special variable ``$(pkg)``,
+where you can add any extra target that must be built for ``pkg``.
+By default every package file specified in `$(PKG_FILES)` will be
+added to ``$(pkg)``, and by default ``$(PKG_FILES)`` holds all
+``*.pkg`` files in the ``$(PKG)`` directory (by default ``$T/pkg``).
+``mkpkg`` is invoked for every file specified in ``$(PKG_FILES)``.
 
 These files are expected to be Python scripts defining two variables:
 
@@ -768,6 +773,15 @@ variable ``FUN``:
 
         Note that ``OPTS['description']`` must be defined and hold a non-empty
         string.
+
+One can exclude packages from being built under certain conditions
+(e.g. D1/D2 only packages) by filtering ``PKG_FILES``:
+
+.. code:: Makefile
+
+          ifeq ($(DVER),1)
+          PKG_FILES := $(filter-out $(PKG)/D2OnlyApp.pkg,$(PKG_FILES))
+          endif
 
 Generated packages will be stored in the ``$P`` directory (by default
 ``$G/pkg``. Since each package usually have a different name, as the version
