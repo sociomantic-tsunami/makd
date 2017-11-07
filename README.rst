@@ -49,8 +49,9 @@ First of all, is important to clarify that Makd do some assumptions on your
 project's layout. All sources files should be located in ``src/`` on the root
 of the project (you can override this by overriding the ``$(SRC)`` variable
 though). This is the bare minimum you have to know, but there are a few more
-conventions (for example, integration tests should go to ``test/``), they will
-be explained when explaining the features that rely on them.
+conventions (for example, integration tests should go to the directory defined
+in ``$(INTEGRATIONTEST)``), they will be explained when explaining the features
+that rely on them.
 
 Top-level Makefile
 ------------------
@@ -284,9 +285,10 @@ same.
 
 The built-in ``*unittest`` target will compile and run the unittests in every
 ``.d`` file found in the ``$(SRC)`` directory. The ``integrationtest`` target
-will compile and run every test program in ``test/``. The ``test`` target
-includes the ``allunittest`` and ``integrationtest`` targets by default, but
-you can add more by using the ``test`` special variable (``test += mytest``).
+will compile and run every test program found in the ``$(INTEGRATIONTEST)``
+directory. The ``test`` target includes the ``allunittest`` and
+``integrationtest`` targets by default, but you can add more by using the
+``test`` special variable (``test += mytest``).
 The ``fasttest`` target will only run the ``fastunittest`` target by default,
 but you can add more too by using the ``fasttest`` special variable.
 
@@ -387,7 +389,7 @@ Variables you might want to override
   module or string to inject in the unittest file that runs all the unit tests.
   See Testing_ for details.
 * ``INTEGRATIONTEST`` to change the default location of integration tests
-  (``test`` by default).
+  (``integrationtest`` by default).
 * ``EXAMPLE`` to change the default location of the example programs
   (``example/`` by default).
 * ``D1TO2FIX_DIRS`` can be used to specify which directories to look for
@@ -961,8 +963,8 @@ Unit tests
 ~~~~~~~~~~
 
 Only *unittest* that live in the directory specified by the ``$(SRC)`` variable
-and the ``test`` directory (`Integration tests`_) are built and run
-automatically, the ``unittest`` target will scan for all the files with the
+and the ``$(INTEGRATIONTEST)`` directory (`Integration tests`_) are built and
+run automatically, the ``unittest`` target will scan for all the files with the
 ``.d`` suffix there.
 
 All the unit tests are built using these extra options::
@@ -1016,17 +1018,17 @@ Integration tests
 ~~~~~~~~~~~~~~~~~
 
 Integration tests are expected to live in the ``$(INTEGRATIONTEST)`` directory
-(``test`` by default), and it is expected that each subdirectory there is
-a separate test program, with a ``main.d`` file as the entry point. So the
-typical layout for the ``$(INTEGRATIONTEST)/`` directory is::
+(``integrationtest`` by default), and it is expected that each subdirectory
+there is a separate test program, with a ``main.d`` file as the entry point. So
+the typical layout for the ``$(INTEGRATIONTEST)/`` directory is::
 
-        test/
-             test_1/
-                    main.d
-                    onemodule.d
-             test_2/
-                    main.d
-                    othermodule.d
+        integrationtest/
+                        test_1/
+                               main.d
+                               onemodule.d
+                        test_2/
+                               main.d
+                               othermodule.d
 
 The ``integrationtest`` target scan for those individual programs (specifically
 for files with the pattern: ``$(INTEGRATIONTEST)/*/main.d``) and builds them
