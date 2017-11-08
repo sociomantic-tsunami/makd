@@ -258,6 +258,12 @@ class Package:
         self.options = checked_get('OPTS', dict)
         self.args = checked_get('ARGS', list)
 
+        # ARGS should be not empty
+        if len(self.args) == 0:
+            die("{}: ARGS can't be empty (maybe you re-bound ARGS like "
+                    "`ARGS = [...]` or `ARGS = list(...)` instead of updating "
+                    "the built-in, like `ARGS.extend(...)` or "
+                    "`ARGS.append(...)`?)", fname)
         # Simple heuristic to detect if ARGS = list("something") was used
         for i in self.args:
             if len(str(i)) != 1:
