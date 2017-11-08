@@ -263,10 +263,10 @@ class Package:
             if len(str(i)) != 1:
                 break
         else:
-            warnf('Your ARGS list looks weird, maybe you mistakenly used '
+            warnf('{}: ARGS looks weird, maybe you mistakenly used '
                     'ARGS.extend("string")? If so, please use '
                     'ARGS.extend(["string"]) (or just ARGS.append("string")) '
-                    'instead.\n\tARGS = {!r}', self.args)
+                    'instead.\n\tARGS is {!r}', fname, self.args)
 
     def __str__(self):
         return 'Package(\nvars={}\noptions={}\nargs={})'.format(
