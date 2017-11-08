@@ -1018,7 +1018,7 @@ Integration tests
 
 Integration tests are expected to live in the ``$(INTEGRATIONTEST)`` directory
 (``integrationtest`` by default), and it is expected that each subdirectory
-there is a separate test program, with a ``main.d`` file as the entry point. So
+stores a separate test program with a ``main.d`` file as the entry point. So
 the typical layout for the ``$(INTEGRATIONTEST)/`` directory is::
 
         $(INTEGRATIONTEST)/
