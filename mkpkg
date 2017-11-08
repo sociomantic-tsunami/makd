@@ -264,7 +264,8 @@ class Package:
                 break
         else:
             warnf('Your ARGS list looks weird, maybe you mistakenly used '
-                    'ARGS=list("string")? If so, please use ARGS=["string"] '
+                    'ARGS.extend("string")? If so, please use '
+                    'ARGS.extend(["string"]) (or just ARGS.append("string")) '
                     'instead.\n\tARGS = {!r}', self.args)
 
     def __str__(self):
