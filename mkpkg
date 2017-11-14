@@ -258,14 +258,21 @@ class Package:
         self.options = checked_get('OPTS', dict)
         self.args = checked_get('ARGS', list)
 
+        # ARGS should be not empty
+        if len(self.args) == 0:
+            die("{}: ARGS can't be empty (maybe you re-bound ARGS like "
+                    "`ARGS = [...]` or `ARGS = list(...)` instead of updating "
+                    "the built-in, like `ARGS.extend(...)` or "
+                    "`ARGS.append(...)`?)", fname)
         # Simple heuristic to detect if ARGS = list("something") was used
         for i in self.args:
             if len(str(i)) != 1:
                 break
         else:
-            warnf('Your ARGS list looks weird, maybe you mistakenly used '
-                    'ARGS=list("string")? If so, please use ARGS=["string"] '
-                    'instead.\n\tARGS = {!r}', self.args)
+            warnf('{}: ARGS looks weird, maybe you mistakenly used '
+                    'ARGS.extend("string")? If so, please use '
+                    'ARGS.extend(["string"]) (or just ARGS.append("string")) '
+                    'instead.\n\tARGS is {!r}', fname, self.args)
 
     def __str__(self):
         return 'Package(\nvars={}\noptions={}\nargs={})'.format(
