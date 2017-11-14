@@ -58,9 +58,9 @@ do
 done
 shift `expr $OPTIND - 1`
 
-version=`git describe --dirty --always`
+version=`git describe --dirty --always --abbrev=4`
 # Add branch name if we only got a hash
-echo "$version" | egrep -q '^[0-9a-f]{7}(-dirty)?$'  &&
+echo "$version" | grep -Eq '^[0-9a-f]{4,}(-dirty)?$' &&
     version=`git rev-parse --abbrev-ref HEAD`-g"$version"
 
 # Check if the user only wanted to print the version number
@@ -96,9 +96,9 @@ for lib in "$@"
 do
     lib_base=`basename $lib`
 
-    ver_desc=`cd $lib && git describe --dirty --always`
+    ver_desc=`cd $lib && git describe --dirty --always --abbrev=4`
     # Add branch name if we only got a hash
-    echo "$ver_desc" | egrep -q '^[0-9a-f]{7}(-dirty)?$'  &&
+    echo "$ver_desc" | grep -Eq '^[0-9a-f]{4,}(-dirty)?$' &&
         ver_desc=`cd $lib && git rev-parse --abbrev-ref HEAD`-g"$ver_desc"
 
     libs="${libs}    version_info[\"lib_${lib_base}\"] = \"${ver_desc}\";\\n"
