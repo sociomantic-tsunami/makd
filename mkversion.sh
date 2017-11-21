@@ -24,6 +24,10 @@ Options:
 -a AUTHOR    Author of the build (default: detected, currently $author)
 -d DATE      Build date string (default now: $date)
 -m MODULE    Module name to use in the module declaration (default: built from -o)
+-F DFLAGS    D compiler flags used to compile the binary (default: taken from
+             \$DFLAGS, now $DFLAGS)
+-f FLAVOUR   MakeD flavour used to compile the binary (default: taken from \$F,
+             now '$F')
 -v           Be more verbose (print a message if the file was updated)
 -p           Only print this repository version and exit
 -h           Shows this help and exit
@@ -43,13 +47,15 @@ NOTE: All these options are replace in the template using sed s// command and
 verbose=0
 module=
 print_only=
-while getopts o:L:a:t:d:m:vph flag
+while getopts o:L:a:t:d:m:F:f:vph flag
 do
     case $flag in
         o)  rev_file="$OPTARG";;
         a)  author="$OPTARG";;
         d)  date="$OPTARG";;
         m)  module="$OPTARG";;
+        F)  DFLAGS="$OPTARG";;
+        f)  F="$OPTARG";;
         v)  verbose=1;;
         p)  print_only=1;;
         h)  print_usage ; exit 0;;
@@ -88,7 +94,9 @@ sed -i "$tmp" \
     -e "s/@VERSION@/$version/" \
     -e "s/@DATE@/$date/" \
     -e "s/@AUTHOR@/$author/" \
-    -e "s/@COMPILER@/$compiler/"
+    -e "s/@COMPILER@/$compiler/" \
+    -e "s/@DFLAGS@/$DFLAGS/" \
+    -e "s/@FLAVOUR@/$F/"
 
 # Generate the libraries info
 libs=''
