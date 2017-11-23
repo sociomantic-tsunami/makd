@@ -95,7 +95,7 @@ sed -i "$tmp" \
     -e "s/@DATE@/$date/" \
     -e "s/@AUTHOR@/$author/" \
     -e "s/@COMPILER@/$compiler/" \
-    -e "s/@DFLAGS@/$DFLAGS/" \
+    -e "s\#@DFLAGS@\#$DFLAGS\#" \
     -e "s/@FLAVOUR@/$F/"
 
 # Generate the libraries info
