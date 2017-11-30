@@ -86,17 +86,7 @@ tmp=`mktemp mkversion.XXXXXXXXXX`
 trap "rm -f '$tmp'; exit 1" INT TERM QUIT
 
 # Generate the file (in a temporary) based on a template
-cp "$template" "$tmp"
 module=${module:-`echo "$rev_file" | sed -e 's|/|.|g' -e 's|.d||g'`}
-
-sed -i "$tmp" \
-    -e "s/@MODULE@/$module/" \
-    -e "s/@VERSION@/$version/" \
-    -e "s/@DATE@/$date/" \
-    -e "s/@AUTHOR@/$author/" \
-    -e "s/@COMPILER@/$compiler/" \
-    -e "s/@DFLAGS@/$DFLAGS/" \
-    -e "s/@FLAVOUR@/$F/"
 
 # Generate the libraries info
 libs=''
@@ -111,7 +101,27 @@ do
 
     libs="${libs}    version_info[\"lib_${lib_base}\"] = \"${ver_desc}\";\\n"
 done
-sed -i "s/@LIBRARIES@/$libs/" "$tmp"
+
+awk \
+    -v module="$module" \
+    -v version="$version" \
+    -v date="$date" \
+    -v author="$author" \
+    -v compiler="$compiler" \
+    -v dflags="$DFLAGS" \
+    -v flavour="$F" \
+    -v libraries="$libs" \
+    '{
+        gsub("@MODULE@", module);
+        gsub("@VERSION@", version);
+        gsub("@DATE@", date);
+        gsub("@AUTHOR@", author);
+        gsub("@COMPILER@", compiler);
+        gsub("@DFLAGS@", dflags);
+        gsub("@FLAVOUR@", flavour);
+        gsub("@LIBRARIES@", libraries);
+        print $0;
+    }' "$template" > "$tmp"
 
 # Check if anything has changed
 if [ -e "$rev_file" ]
