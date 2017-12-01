@@ -35,7 +35,6 @@ Maintained Major Branches
 Major  Initial release date Supported until
 ====== ==================== ===============
 v1.x.x v1.4.0_: 24/06/2016  Fri 08/12/2017
-====== ==================== ===============
 v2.x.x v2.0.0_: 08/09/2017  TBD
 ====== ==================== ===============
 .. _v1.4.0: https://github.com/sociomantic-tsunami/makd/releases/tag/v1.4.0
