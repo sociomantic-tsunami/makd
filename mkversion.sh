@@ -61,7 +61,7 @@ shift `expr $OPTIND - 1`
 version=`git describe --dirty --always --abbrev=4`
 # Add branch name if we only got a hash
 echo "$version" | grep -Eq '^[0-9a-f]{4,}(-dirty)?$' &&
-    version=`git rev-parse --abbrev-ref HEAD`-g"$version"
+    version=`git rev-parse --abbrev-ref HEAD`-0-g"$version"
 
 # Check if the user only wanted to print the version number
 if [ "$print_only" = 1 ]
