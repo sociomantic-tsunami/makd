@@ -1,0 +1,31 @@
+# We will use docker to set up our environment, so don't use any particular
+# language in Travis itself
+language: generic
+
+# Enable docker
+sudo: required
+services:
+    - docker
+
+# Disable automatic submodule fetching (it's done recursively)
+git:
+    submodules: false
+
+# Global environment variables
+env:
+    global:
+        - DIST=xenial
+        # Make sure beaver is in the PATH
+        - PATH="$(git config -f .gitmodules submodule.beaver.path)/bin:$PATH"
+
+# Do a shallow submodule fetch
+before_install: git submodule update --init
+
+# Create docker images and setup environment to build
+install: beaver install
+
+# Basic config is inherited from the global scope
+jobs:
+    include:
+        - stage: Test
+          script: beaver make test
