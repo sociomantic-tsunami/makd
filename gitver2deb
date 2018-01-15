@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+# Copyright 2018 sociomantic labs GmbH.
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+# This converts version from `git describe`-style SemVer versions to Debian
+# compatible version.
+#
+# The input version is take from STDIN and is expected to be in the form:
+# [v]<upstream_version>[-<C>-g<H>][-dirty]
+#
+# Where:
+#
+# <upstream_version>
+#   Is the current version of the project, expected to be the last tag, which
+#   should be SemVer compatible, or a branch name.
+#   It will be parsed as a SemVer version:
+#     <X>.<Y>.<Z>[-<pre_release>][+<metadata>]
+#   If the parsing is not successful, <X>, <Y> and <Z> are interpreted as 0 and
+#   the <pre_release> is set to `git.<upstream_version>` (so is interpreted as
+#   a 0.0.0 pre-release). In this case any non-alphanumeric character that is
+#   not compatible with the SemVer character set allowed for pre-releases is
+#   replaced by `.`.
+#
+#   Also the `-` chars in <pre_release> and <metadata> is translated to `.` (as
+#   `-` has a special meaning for Debian versions).
+#
+# <C>
+#   Is how many commits ahead of the last tag the project is.
+#
+# <H>
+#  Is the hash of the current version's commit.
+#
+# Parts between [] are optional.
+#
+# The translated version is then constructed as:
+# <X>.<Y>.<Z>[~<pre_release>][+<C>][+dirty.<date>][~<H>][~<metadata>]
+#
+# Where:
+#
+# <date> is the current date in YYYYmmddHHMMSS format.
+#
+# Some references:
+#
+# - Debian version specification:
+#   https://www.debian.org/doc/debian-policy/#version
+#
+# - Debian versions can be compared for debugging purposes using:
+#   dpkg --compare-versions <A> [eq|ge|le|gt|lt] <B>
+#
+# - SemVer:
+#   https://semver.org/
+
+import re
+import sys
+import datetime
+import subprocess
+
+DEBUG = False
+
+git_describe_re = re.compile(
+        r'^(?P<last_tag>.+?)'
+        r'(?:'
+            r'-(?P<commits_ahead>\d+)'
+            r'-g(?P<commit_hash>[0-9a-fA-F]{4,})'
+        r')?'
+        r'(?:-(?P<dirty>dirty))?$'
+)
+
+semver_chars = r'0-9A-Za-z\.-'
+
+semver_re = re.compile(
+        r'^v?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'
+        r'(?:-(?P<pre_release>[{0}]+))?'
+        r'(?:\+(?P<metadata>[{0}]+))?$'.format(semver_chars)
+)
+
+version = sys.stdin.read().strip()
+
+major = '0'
+minor = '0'
+patch = '0'
+pre_release = ''
+metadata = ''
+commits_ahead = ''
+commit_hash = ''
+dirty = ''
+
+git_match = git_describe_re.match(version)
+if git_match:
+    version = git_match.group('last_tag')
+    commits_ahead = git_match.group('commits_ahead')
+    commit_hash = git_match.group('commit_hash')
+    dirty = git_match.group('dirty')
+
+semver_match = semver_re.match(version)
+if semver_match:
+    major = semver_match.group('major')
+    minor = semver_match.group('minor')
+    patch = semver_match.group('patch')
+    pre_release = semver_match.group('pre_release')
+    metadata = semver_match.group('metadata')
+else:
+    pre_release = 'git.' + re.sub('[^' + semver_chars + ']', '.', version)
+
+if DEBUG:
+    sys.stderr.write("major={!r} minor={!r} patch={!r} "
+            "pre_release={!r} metadata={!r} "
+            "commits_ahead={!r} commit_hash={!r} dirty={!r}\n".format(
+                major, minor, patch, pre_release, metadata,
+                commits_ahead, commit_hash, dirty))
+
+version = '{}.{}.{}'.format(major, minor, patch)
+if pre_release:
+    version += '~' + pre_release.replace('-', '.')
+if commits_ahead:
+    version += '+' + commits_ahead
+if dirty:
+    version += '+dirty.{:%Y%m%d%H%M%S}'.format(datetime.datetime.now())
+if commit_hash:
+    version += '~' + commit_hash
+if metadata:
+    version += '~' + metadata.replace('-', '.')
+
+print(version)

@@ -246,12 +246,7 @@ VERSION := $(shell DC="$(DC)" $(MAKD_PATH)/mkversion.sh -p)
 # `-` in the dirty separator is also replaced with `~`. This is done for
 # improved Debian version comparison.
 # Example: v1.2.1-4-gea7105b-dirty -> 1.2.1+4~dirty.20160202160552~ea7105b
-PKGVERSION := $(shell echo $(VERSION) | \
-                sed 's/^v\(.*\)/\1/' | \
-                sed 's/^\(.*\)-\([0-9]\+\)-g\([0-9a-f]\+\)/\1+\2~\3/' | \
-                sed 's/^\([^0-9]\)/0\1/' | \
-                sed 's/\(~[0-9a-f]\+\)-dirty$$/-dirty\1/' | \
-                sed 's/-dirty/~dirty.'`date +%Y%m%d%H%M%S`'/')
+PKGVERSION := $(shell echo $(VERSION) | $(MAKD_PATH)/gitver2deb)
 
 # The files specified in this variable will be excluded from the generated
 # unit tests targets and from the integration test main files.

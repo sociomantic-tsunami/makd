@@ -1,0 +1,75 @@
+#!/bin/sh
+
+gitver2deb="$(dirname $0)/../gitver2deb"
+
+r=0
+
+# Read from file
+exec < "$(dirname $0)/$(basename $0 .test).versions.txt"
+
+while read line
+do
+    if test -z "$line" || echo "$line" | grep -q '^#'
+    then
+        continue
+    fi
+    set -- $line
+    original="$1"
+    expected="$2"
+    new=$(echo "$original" | "$gitver2deb" |
+            # Adjust date in a way that we can compare
+            sed 's/+dirty\.[0-9]\{14\}/+dirty.YYYYmmddHHMMSS/')
+    export ordered="$ordered $new"
+    if test "$V" = 1
+    then
+        echo "test '$new' = '$expected'"
+    fi
+    if test "$new" != "$expected"
+    then
+        r=1
+        printf "FAILURE for '%s'!\n\tEXPECTED: '%s\n\tGOT:      '%s\n" \
+            "$original" "$expected" "$new" >&2
+    fi
+done
+
+if test $r -ne 0
+then
+    exit $r
+fi
+
+set -- $ordered
+
+while true
+do
+    old=$1; shift
+    if test -z "$1"
+    then
+        break
+    fi
+    if test "$V" = 1
+    then
+        echo "dpkg --compare-versions '$old' lt '$1'"
+    fi
+    if ! dpkg --compare-versions "$old" lt "$1"
+    then
+        r=1
+        printf "FAILURE comparing: dpkg --compare-versions '%s' lt '%s'!\n" \
+                "$old" "$1" >&2
+    fi
+done
+
+# Special case to compare dates
+old="1.8.2+4+dirty.20180105195104~abcf"
+new="1.8.2+4+dirty.20180105195323~abcf"
+if test "$V" = 1
+then
+    echo "dpkg --compare-versions '$old' lt '$new'"
+fi
+if ! dpkg --compare-versions "$old" lt "$new"
+then
+    r=1
+    printf "FAILURE comparing: dpkg --compare-versions '%s' lt '%s'!\n" \
+            "$old" "$new" >&2
+fi
+
+exit $r
