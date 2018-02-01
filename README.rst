@@ -415,6 +415,9 @@ Variables you might want to override
   obtained via the ``mkversion.sh`` by default.
 * ``PKGVERSION`` is the version to be used when creating packages. It's
   obtained via the ``VERSION`` variable by default.
+* ``PKGITERATION`` optionally allows setting the package *iteration* (forwarded
+  to `fpm` as `--iteration`, known as the `debian_revision`
+  [in Debian](https://www.debian.org/doc/debian-policy/#version)).
 * ``PRE_BUILD_D`` and ``POST_BUILD_D`` hold scripts executed before and after
   running the command to build D targets (when using the ``build_d`` function).
   By default they are used to generate the ``Version.d`` file, but users can
@@ -764,6 +767,9 @@ passed to the ``mkpkg`` util. By default Makd passes the following variables:
 
 ``version``
         package version number as defined by ``PKGVERSION``.
+
+``iteration``
+        package iteration as defined by ``PKGITERATION``.
 
 ``builddir``
         base build directory (``$G``).
