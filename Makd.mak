@@ -146,9 +146,13 @@ PKG_FILES ?= $(wildcard $(PKG)/*.pkg)
 # (defined lazily so we can use target variables)
 ifndef PKG_DEFAULTS
 DISTRO_CODENAME="$(shell lsb_release -rs | grep rolling || lsb_release -cs)"
+
+# Default package iteration
+PKGITERATION ?= "$(DISTRO_CODENAME)"
+
 PKG_DEFAULTS = -D-f -D-sdir -D-t$(PKGTYPE) -D--deb-changelog="$O/changelog.Debian" \
 		-D--version="$(PKGVERSION)" \
-		-D--iteration="$(DISTRO_CODENAME)" \
+		-D--iteration="$(PKGITERATION)" \
 		-d lsb_release="$(DISTRO_CODENAME)"
 endif
 
@@ -486,6 +490,7 @@ $O/pkg-%.stamp: $(PKG)/%.pkg $G/pkg-flags
 		$(if $V,,-vv) -D-p"$P" -F "$(FPM)" \
 		$(PKG_DEFAULTS) \
 		-d suffix="$(PKG_SUFFIX)" -d version="$(PKGVERSION)" \
+		-d iteration="$(PKGITERATION)" \
 		-d builddir="$G" -d bindir="$B" \
 		-d fullname="$*$(PKG_SUFFIX)" -d shortname="$*" \
 		$<,$<,mkpkg)
