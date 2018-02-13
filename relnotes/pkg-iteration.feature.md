@@ -1,4 +1,4 @@
-## The package iteration can now be specified via `PKGITERATION`
+### The package iteration can now be specified via `PKGITERATION`
 
 Package versions consist of two components: the _upstream version_, and
 the _package iteration_ (corresponding to the `debian_revision` where
