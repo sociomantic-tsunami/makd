@@ -1202,7 +1202,7 @@ where reports can be cleaned automatically (except for ``make clean`` of
 course). There is a convenience target to just clean coverage reports:
 ``clean-cov``.
 
-Merging and overrideable dirirectory versions:
+Merging and overrideable directory versions:
 
 * ``dmd1``: tangort v1.8.0+
 * ``dmd-transitional``: v2.070.2.s15+ and v2.071.2.s4+
