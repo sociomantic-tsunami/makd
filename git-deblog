@@ -168,14 +168,14 @@ def get_tag(refs):
             tags.remove(t)
     if not tags:
         return None
-    if len(tags) > 1:
-        warn('more than one tag found for commit {}, using the first '
-                'one ({})', hash, ', '.join(tags))
     def get_field(field):
         hdr = field + ' '
         r = [l for l in tag_info if l.startswith(hdr)]
         return [l for l in tag_info if l.startswith(hdr)][0][len(hdr):]
     hash = get_field('object')
+    if len(tags) > 1:
+        warn('more than one tag found for commit {}, using the first '
+                'one ({})', hash, ', '.join(tags))
     author, timestamp, offset = get_field('tagger').rsplit(' ', 2)
     tz = timezone(timedelta(minutes=int(offset[0]+'1') * (
             int(offset[1:2])*60 + int(offset[3:4]))))
