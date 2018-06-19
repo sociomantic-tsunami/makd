@@ -580,6 +580,9 @@ $O/%unittests.stamp: $O/%unittests
 		 -p $(call file2module,$(INTEGRATIONTEST)). $(UTFLAGS),$<,run)
 	$Vtouch $@
 
+# Save test binaries in case the user want to re-run them
+.PRECIOUS: $O/%unittests $O/%unittests.d
+
 # Integration tests rules
 ##########################
 
@@ -610,6 +613,10 @@ $O/test-%: $T/$(INTEGRATIONTEST)/%/main.d $G/build-d-flags
 $O/test-%.stamp: $O/test-%
 	$(call exec,$< $(ITFLAGS),$<,run)
 	$Vtouch $@
+
+# Save test binaries in case the user want to re-run them
+.PRECIOUS: $(patsubst $C/$(INTEGRATIONTEST)/%/main.d,$O/test-%,\
+		$(wildcard $C/$(INTEGRATIONTEST)/*/main.d))
 
 # Rule to build examples
 #########################
@@ -647,6 +654,10 @@ example-run: $(patsubst $T/$(EXAMPLE)/%/main.d,$O/example-%.stamp,\
 $O/example-%.stamp: $O/example-%
 	$(call exec,$< $(EXAMPLEFLAGS),$<,run)
 	$Vtouch $@
+
+# Save example binaries in case the user want to re-run them
+.PRECIOUS: $(patsubst $C/$(EXAMPLE)/%/main.d,$O/example-%,\
+		$(wildcard $C/$(EXAMPLE)/*/main.d))
 
 # Documentation rules
 ######################
