@@ -894,8 +894,8 @@ For convenience, here is a simple example:
         This is a longer paragraph in the package description that
         can span multiple lines.''',
           url = 'https://github.com/sociomantic/makd',
-          maintainer = 'Sociomantic Labs GmbH <info@sociomantic.com>',
-          vendor = 'Sociomantic Labs GmbH',
+          maintainer = 'dunnhumby Germany GmbH <info@sociomantic.com>',
+          vendor = 'dunnhumby Germany GmbH',
         )
 
 ``$P/daemon.pkg``:
