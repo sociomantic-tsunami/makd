@@ -7,7 +7,7 @@
     DO NOT ADD TO THE REPOSITORY
 
     Copyright:
-        Template source Copyright (c) 2014-2016 Sociomantic Labs GmbH.
+        Template source Copyright (c) 2014-2016 dunnhumby Germany GmbH.
 	Generated code based on this template is owned by the user who ran the
 	generation.
 
