@@ -183,6 +183,14 @@ override DFLAGS += -O -inline
 endif
 
 
+# Position-independent code
+############################
+
+ifeq ($(USE_PIC),1)
+override DFLAGS += -fPIC
+endif
+
+
 # Directories
 ##############
 
