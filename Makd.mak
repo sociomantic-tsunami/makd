@@ -28,6 +28,8 @@ PROJECT_NAME ?= $(shell basename $T)
 
 # Define the valid flavors
 VALID_FLAVORS := devel production
+# Aliases for the above (in the same order)
+VALID_FLAVOR_SHORT := development prod
 
 # Flavor (variant), can be defined by the user in Config.mak
 F ?= devel
@@ -56,7 +58,17 @@ INTEGRATIONTEST ?= integrationtest
 # Default location to look for examples
 EXAMPLE ?= example
 
-# Check flavours
+# Map short flavour names to full if they have been used
+IS_SHORT_FLAVOR_ := $(if $(filter $F,$(VALID_FLAVOR_SHORT)),1,0)
+ifeq ($(IS_SHORT_FLAVOR_),1)
+	# a short name so we need to find the index of it in the list
+	SHORT_FLAVOR_INDEX_ := $(words $(shell a="$(VALID_FLAVOR_SHORT)"; echo $${a%%$(F)*} X))
+	# now set F to the full flavour - that is the word in the full flavour list
+	# with the same index
+	override F := $(word $(SHORT_FLAVOR_INDEX_), $(VALID_FLAVORS))
+endif
+
+# Check valid flavour specified
 FLAVOR_IS_VALID_ := $(if $(filter $F,$(VALID_FLAVORS)),1,0)
 ifeq ($(FLAVOR_IS_VALID_),0)
 $(error F=$F is not a valid flavor (options are: $(VALID_FLAVORS)))

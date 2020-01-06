@@ -648,10 +648,11 @@ Yes, is a bit confusing that ``$V`` internally becomes empty when you use
 Flavors
 -------
 Flavors are just different ways to compile one project using different flags. By
-default the ``devel`` and ``production`` flavors are defined. The `The build
-directory`_ stores one subdirectory for each flavor so you can compile one after
-the other without mixing objects compiled for one with the other and your cache
-doesn't get destroyed by a ``make clean``.
+default the ``devel`` and ``production`` flavors are defined (the aliases
+``development`` and ``prod`` can also be used). The `The build directory`_
+stores one subdirectory for each flavor so you can compile one after the other
+without mixing objects compiled for one with the other and your cache doesn't
+get destroyed by a ``make clean``.
 
 To change variables based on the flavor (or define new flavors), usually the
 `Config.mak`_ is the place, and you can use normal Make constructs, for
