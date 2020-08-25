@@ -27,7 +27,7 @@ R := $(subst $T,,$(patsubst $T/%,%,$(CURDIR)))
 PROJECT_NAME ?= $(shell basename $T)
 
 # Define the valid flavors
-VALID_FLAVORS := devel production
+VALID_FLAVORS := devel prod
 
 # Flavor (variant), can be defined by the user in Config.mak
 F ?= devel
@@ -59,6 +59,12 @@ EXAMPLE ?= example
 # Check flavours
 FLAVOR_IS_VALID_ := $(if $(filter $F,$(VALID_FLAVORS)),1,0)
 ifeq ($(FLAVOR_IS_VALID_),0)
+
+# The next 3 lines should be removed in v4.x.x
+ifeq ($F,production)
+$(error F=$F is not a valid flavor, 'production' was renamed to 'prod', please update your code.)
+endif
+
 $(error F=$F is not a valid flavor (options are: $(VALID_FLAVORS)))
 endif
 
@@ -161,7 +167,7 @@ ifeq ($F,devel)
 override DFLAGS += -debug
 endif
 
-ifeq ($F,production)
+ifeq ($F,prod)
 override DFLAGS += -O -inline
 endif
 

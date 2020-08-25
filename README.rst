@@ -172,7 +172,7 @@ directory you can find these other directories and files:
 
 ``<flavor>``
         Makd support Flavors_ (also called variants), by default flags are
-        provided for the *devel* and the *production* flavors. All the symbols
+        provided for the *devel* and the *prod* flavors. All the symbols
         produced by the *devel* variant (the default) for example, will live in
         the ``devel`` subdirectory in the build directory.
 
@@ -236,7 +236,7 @@ is no need to use the built-in ``make clean`` target and destroy all your cache
 (with all the other Flavors_ you compiled in the past).
 
 By default the ``devel`` flavor is compiled, but you can compile the
-``production`` flavor by using ``make F=production``.
+``prod`` flavor by using ``make F=prod``.
 
 Also, if you have several cores, use ``make -j2`` and enjoy of Make's
 parallelism for free! (this will use 2 cores, you can use ``-j3`` for 3 and so
@@ -254,7 +254,7 @@ makes Make evaluate more options than needed.
 Of course you can combine many Makd and Make options, and specify more than one
 target, for example::
 
-        make -Brj4 F=production V=1 COLOR= all test
+        make -Brj4 F=prod V=1 COLOR= all test
 
 
 Predefined targets
@@ -439,7 +439,7 @@ provided by Makd. For this purpose, the following variables are exported:
 * ``MAKD_BINDIR``: directory where build binaries are stored.
 
 * ``MAKD_FLAVOR``: flavor currently being built (usually either ``devel`` or
-  ``production``).
+  ``prod``).
 
 * ``MAKD_DVER``: D version used (usually either ``1`` or ``2``).
 
@@ -620,7 +620,7 @@ Yes, is a bit confusing that ``$V`` internally becomes empty when you use
 Flavors
 -------
 Flavors are just different ways to compile one project using different flags. By
-default the ``devel`` and ``production`` flavors are defined. The `The build
+default the ``devel`` and ``prod`` flavors are defined. The `The build
 directory`_ stores one subdirectory for each flavor so you can compile one after
 the other without mixing objects compiled for one with the other and your cache
 doesn't get destroyed by a ``make clean``.
@@ -635,7 +635,7 @@ example:
         override DFLAGS += -debug=ProjectDebug
         endif
 
-        ifeq ($F,production)
+        ifeq ($F,prod)
         override DFLAGS += -version=SuperOptimized
         endif
 
@@ -645,14 +645,14 @@ special flags even if the user passes a ``DFLAGS=-flag`` to Make.
 To compile the project using a particular flavor, just pass the ``F`` variable
 to make, for example::
 
-        make F=production
+        make F=prod
 
 If you need to define more flavors, you can do so by defining the
 ``$(VALID_FLAVORS)`` variable in your ``Config.mak``, for example:
 
 .. code:: make
 
-        VALID_FLAVORS := devel production profiling
+        VALID_FLAVORS := devel prod profiling
 
 
 Target specific flags
