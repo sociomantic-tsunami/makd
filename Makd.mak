@@ -101,18 +101,8 @@ COLOR_ERR ?= 00;31
 # See COLOR_CMD comment for details.
 COLOR_OUT ?= $(COLOR_ERR)
 
-# To compile the D2 version, you can use make DVER=2
-# FIXME_IN_D2: This is only present as a transitional solution, it should be
-# removed after the D2 migration is done
-DVER ?= 1
-export MAKD_DVER := $(DVER)
-
-# Default D compiler (tries first with dmd1 and uses dmd if not present)
-ifeq ($(DVER),1)
-export DC ?= dmd1
-else
+# Default D compiler
 export DC ?= dmd
-endif
 
 # Default rdmd binary to use (same as with dmd)
 RDMD ?= rdmd
@@ -122,9 +112,6 @@ HMOD ?= hmod
 
 # harbored-mod flags
 HMODFLAGS ?= --project-name $(PROJECT_NAME) --project-version $(VERSION)
-
-# Default d1to2fix binary location
-D1TO2FIX ?= d1to2fix
 
 # Default fpm binary location
 FPM ?= fpm
@@ -167,10 +154,6 @@ endif
 
 # Default compiler flags
 #########################
-
-ifeq ($(DVER),1)
-DFLAGS ?= -di
-endif
 
 override DFLAGS += -g
 
@@ -264,9 +247,6 @@ PKGVERSION := $(shell echo $(VERSION) | $(MAKD_PATH)/gitver2deb)
 # http://www.gnu.org/software/make/manual/make.html#Text-Functions
 TEST_FILTER_OUT :=
 
-# Directories to search for files to convert using d1to2fix
-D1TO2FIX_DIRS := $C
-
 
 # Code coverage
 ################
@@ -283,14 +263,7 @@ COVMERGE ?= 1
 # Configure environment for coverage
 ifeq ($(COV),1)
     override DFLAGS += -cov
-    ifeq ($(DVER),1)
-        DRT_COVMERGE ?= $(COVMERGE)
-        export DRT_COVMERGE
-        DRT_COVDSTPATH ?= $(COVDIR)
-        export DRT_COVDSTPATH
-    else # DVER is 2
-		override _test_drt_opts := --DRT-covopt="merge:$(COVMERGE) dstpath:$(COVDIR)"
-    endif
+	override _test_drt_opts := --DRT-covopt="merge:$(COVMERGE) dstpath:$(COVDIR)"
 endif
 
 # Functions
@@ -434,7 +407,7 @@ check_deb = $Vi=`apt-cache policy $1 | grep Installed | cut -b14-`; \
 # 3: arguments to be passed to the $(POST_BUILD_D) script
 define build_d
 	$(PRE_BUILD_D) $2
-	$(call $(if $(subst 2,,$(DVER)),exec,exec_nc),\
+	$(call $(if exec,exec_nc),\
 		$(BUILD.d) --build-only $1 $(LOADLIBES) $(LDLIBS) -of$@ \
 		$(firstword $(filter %.d,$^)))
 	$(POST_BUILD_D) $3
@@ -791,21 +764,6 @@ pkg += $(patsubst $(PKG)/%.pkg,$O/pkg-%.stamp,$(PKG_FILES))
 .PHONY: pkg
 pkg: $(pkg)
 
-
-# Temporary rule to convert code from D1 to D2
-###############################################
-
-
-.PHONY: d2conv
-d2conv: $O/d2conv.stamp
-
-$O/d2conv.stamp: $(D1TO2FIX_DIRS)
-	$Vfind $(D1TO2FIX_DIRS) -type f -regex '^.+\.d$$' > $@
-ifeq "$(shell $(D1TO2FIX) --help 2>/dev/null | grep -- --input)" ""
-	$(call exec, $(D1TO2FIX) --fatal `cat $@`)
-else
-	$(call exec, $(D1TO2FIX) $(DIMPORTPATHS) --fatal --input=$@)
-endif
 
 # Automatic dependency handling
 ################################

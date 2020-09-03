@@ -13,9 +13,6 @@ provides a default test target that runs unittests and arbitrary integration
 tests, it detects if you change the compilation flags and recompile if
 necessary, etc.
 
-Makd by default runs dmd1 compiler, as it supports D1, but compiling with D2 is
-also supported (see under `D2 support`_ for details).
-
 Versioning
 ----------
 
@@ -346,27 +343,6 @@ The standard Make variable ``LDFLAGS`` have a special treatment when used with
 specify libraries to link to, just use ``-lname``, not ``-L-lname`` (same with
 any other linker flag).
 
-D2 support
-~~~~~~~~~~
-There is experimental support to build projects using D2. You just have to use
-the special variable ``DVER``. For example::
-
-        make DVER=2 test
-
-Inside your ``Build.mak`` you can also use this to build your project
-differently in D1 and D2, for example:
-
-.. code:: make
-
-        ifeq ($(DVER),2)
-        rule: d2_file.d
-        endif
-
-To make project always use D2 compiler, simply define this variable in
-``Config.mak``:
-
-        DVER:=2
-
 Variables you might want to override
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * The special target variables ``all``, ``test``, ``doc``.
@@ -378,8 +354,7 @@ Variables you might want to override
 * ``P`` is where built packages will be created. Defaults to ``$G/pkg``.
 * Program location variables: ``DC`` is the D compiler to use, you can build
   your project with a different DMD by using ``make
-  DC=/usr/bin/experimental-dmd`` for example. Same for ``RDMD``, ``D1TO2FIX``
-  and ``FPM``.
+  DC=/usr/bin/experimental-dmd`` for example. Same for ``RDMD``, and ``FPM``.
 * Less likely you might want to override the ``DFLAGS``, ``RDMDFLAGS`` or
   ``FPMFLAGS``, but usually there are better methods to do that instead.
 * ``TEST_FILTER_OUT`` to exclude some files from the unit tests or integration
@@ -393,9 +368,6 @@ Variables you might want to override
   (``integrationtest`` by default).
 * ``EXAMPLE`` to change the default location of the example programs
   (``example/`` by default).
-* ``D1TO2FIX_DIRS`` can be used to specify which directories to look for
-  D files to be converted to D2 via the ``d2conv`` target. By default ``$C`` is
-  used (i.e. the project's root).
 * ``SRC`` is where all the source files of your project is expected to be. By
   default is ``src`` but you can override it with ``.`` if you keep the source
   file in the top-level. The path must be relative to the project's top-level
@@ -603,7 +575,7 @@ This function converts a file path to a D module. It takes as first argument
 a file path to convert and as optional second argument the base path of the
 sources (path that is not part of the fully qualified module name), by defaul
 ``$C/$(SRC)``. This function takes into account the special ``pkg/package.d``
-module name in D2, converting it to just ``pkg``.
+module name, converting it to just ``pkg``.
 
 For example:
 
@@ -823,12 +795,12 @@ variable ``FUN``:
         string.
 
 One can exclude packages from being built under certain conditions
-(e.g. D1/D2 only packages) by filtering ``PKG_FILES``:
+(e.g. based on compilation flags) by filtering ``PKG_FILES``:
 
 .. code:: Makefile
 
-          ifeq ($(DVER),1)
-          PKG_FILES := $(filter-out $(PKG)/D2OnlyApp.pkg,$(PKG_FILES))
+          ifeq ($(IS_RELEASE_MODE),1)
+          PKG_FILES := $(filter-out $(PKG)/NonReleaseApp.pkg,$(PKG_FILES))
           endif
 
 Generated packages will be stored in the ``$P`` directory (by default
