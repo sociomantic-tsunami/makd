@@ -219,7 +219,7 @@ Once you have the basic setup done, you can already enjoy a lot of small cool
 features. For example you get a nice, terse and colorful output, for example::
 
         mkversion src/Version.d
-        rdmd1 build/devel/bin/someapp
+        rdmd build/devel/bin/someapp
 
 If there are any errors, messages will appear in red so they are easier to spot.
 
@@ -1176,6 +1176,4 @@ course). There is a convenience target to just clean coverage reports:
 
 Merging and overrideable directory versions:
 
-* ``dmd1``: tangort v1.8.0+
-* ``dmd-transitional``: v2.070.2.s15+ and v2.071.2.s4+
 * ``dmd``: v2.078.0+
