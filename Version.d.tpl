@@ -20,19 +20,7 @@
 
 module @MODULE@;
 
-// Use weird symbols name to minimize risk of clashing with identical aliases
-// from generic D2 transition helper module. Module itself is not imported
-// here to minimize external makd dependencies.
-version (D_Version2)
-{
-    mixin("alias immutable(char)[] _tpl_istring;");
-}
-else
-{
-    alias char[] _tpl_istring;
-}
-
-_tpl_istring[_tpl_istring] version_info;
+string[string] version_info;
 
 static this()
 {
@@ -113,16 +101,8 @@ private void buildPredefinedVersions()
 
 *******************************************************************************/
 
-private template Id (_tpl_istring name)
+private template Id (string name)
 {
-    version (D_Version2)
-    {
-        mixin("static immutable Id = `version (` ~ name ~ `) version_info[\"ver_`
-             ~ name ~ `\"] = \"` ~ name ~ `\";`;");
-    }
-    else
-    {
-        const _tpl_istring Id = `version (` ~ name ~ `) version_info["ver_` ~ name ~
-            `"] = "` ~ name ~ `";`;
-    }
+    static immutable Id = `version (` ~ name ~ `) version_info[\"ver_`
+         ~ name ~ `\"] = \"` ~ name ~ `\";`;
 }
