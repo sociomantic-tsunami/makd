@@ -23,7 +23,7 @@ Support Guarantees
 ------------------
 
 * Major branch development period: 3 months
-* Maintained minor versions: 2 most recent
+* Maintained minor versions: most recent
 
 Maintained Major Branches
 -------------------------
@@ -31,9 +31,11 @@ Maintained Major Branches
 ====== ==================== ===============
 Major  Initial release date Supported until
 ====== ==================== ===============
-v2.x.x v2.0.0_: 08/09/2017  31/12/2020
+v2.x.x v2.0.0_: 2017-09-08  2020-12-31
+v3.x.x v3.0.0_: 2020-11-02  TBD
 ====== ==================== ===============
 .. _v2.0.0: https://github.com/sociomantic-tsunami/makd/releases/tag/v2.0.0
+.. _v3.0.0: https://github.com/sociomantic-tsunami/makd/releases/tag/v3.0.0
 
 
 .. contents::
