@@ -89,34 +89,21 @@ def parse_args():
     return parser, args
 
 
+class Dependency:
+    def __init__(self, pkg, version=''):
+        self.pkg = pkg
+        self.version = version
+    def __str__(self):
+        version = self.version
+        if version:
+            version = ' ' + version
+        return self.pkg + version
+
 class Functions:
-
-    # lines: "\t<name> => <path> (<address>)"
-    #        "\t<name> => not found"
-    ldd_re = re.compile(r'^\s+(\S+) => (.*?)(?: \(.*\))?$', re.MULTILINE)
-
-    # lines: "<package>:<arch>: <file>"
-    dpkg_re = re.compile(r'^([^:]+)(?::[^:]+)?: .*$', re.MULTILINE)
-
-    autodeps_exclusions = frozenset(r'''
-            linux-vdso.so.1
-        '''.split())
 
     def __init__(self, args, pkg):
         self.args = args
         self.pkg = pkg
-
-    def _parse_cmd(self, cmd, *args):
-        args1 = cmd.split()
-        cmd = args1.pop(0)
-        regex = getattr(self, cmd + '_re')
-        cmd = [getattr(self.args, cmd + '_path')]
-        cmd.extend(args1)
-        cmd.extend(args)
-        debugf("Running command: {}", cmd)
-        output = subprocess.check_output(cmd).decode(sys.stdin.encoding)
-        debugf("Output: {}", output)
-        return regex.findall(output)
 
     def _expand_list(self, files, path=''):
         if path and not path.endswith('/'):
@@ -127,7 +114,51 @@ class Functions:
                 s.update([path + ff for ff in f])
             else:
                 s.add(path + f)
-        return s
+        return list(s)
+
+    def dpkg_autodeps(self, binaries):
+        from tempfile import TemporaryDirectory
+        from contextlib import ExitStack
+
+        deps = []
+        with ExitStack() as stack:
+            tmpdir = stack.enter_context(TemporaryDirectory())
+            debugf("dpkg_autodeps: Created temporary directory {}", tmpdir)
+            stack.callback(debugf, "dpkg_autodeps: Destroying {}", tmpdir)
+            curdir = os.getcwd()
+            stack.callback(os.chdir, curdir)
+            os.chdir(tmpdir)
+            os.mkdir('debian')
+            with open('debian/control', 'w') as control:
+                control.write(r'''Source: bogus
+
+Package: bogus
+Architecture: any
+Depends: ${misc:Depends} ${shlibs:Depends}
+''')
+            cmd = ['dpkg-shlibdeps', '--ignore-missing-info'] + binaries
+            try:
+                debugf("dpkg_autodeps: Running command: {}", cmd)
+                output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+                debugf("dpkg_autodeps: Output: {}", output)
+            except subprocess.CalledProcessError as e:
+                warnf("Looking for dependencies, command `{}` returned {}: {}",
+                        ' '.join(cmd), e.returncode, e.output)
+                return
+            with open('debian/substvars') as substvars:
+                # The line we care about is like:
+                # shlibs:Depends=libacl1 (>= 2.2.51-8), libc6 (>= 5.0), ...
+                # So we first remove the prefix, then split with ', ' to get
+                # the dependency list and finally we split each dependency once
+                # by spaces to create the Dependency(pkg, version)
+                prefix = 'shlibs:Depends='
+                for l in substvars:
+                    if l.startswith(prefix):
+                        debugf("dpkg_autodeps: debian/substvars: {}", l)
+                        for d in l[len(prefix):].split(', '):
+                            deps.append(Dependency(*d.split(maxsplit=1)))
+        return deps
+
 
     def autodeps(self, *fnames, path=''):
         # XXX: Only debian packages supported for now
@@ -136,27 +167,8 @@ class Functions:
             errf("'autodeps' is not yet supported on systems without dpkg")
             sys.exit(1)
 
-        from itertools import chain
-        deps = set()
-        parsed_commands = [self._parse_cmd('ldd', f)
-                for f in self._expand_list(fnames, path)]
-        for lib, lib_path in chain(*parsed_commands):
-            if lib in self.autodeps_exclusions:
-                debugf("`{}` is in autodeps_exclusions, skipping...", lib)
-                continue
-            if lib_path == '' or lib_path == 'not found':
-                warnf("`ldd` returned '{}' for library `{}`, skipping "
-                        "automatic dependency calculation for it...",
-                        lib_path, lib)
-                continue
-            try:
-                deps.add(self._parse_cmd('dpkg', '-S', lib_path)[0])
-            except subprocess.SubprocessError as e:
-                warnf("Error looking up library `{}` (`{}`) via `dpkg`, "
-                        "skipping automatic dependency calculation for it: {}",
-                        lib, lib_path, e)
-                continue
-        return sorted(deps)
+        deps = self.dpkg_autodeps(self._expand_list(fnames, path))
+        return sorted(set(str(d) for d in deps))
 
     def mapfiles(self, src, dst, *files, **kwargs):
         append_suffix = kwargs.get('append_suffix', True)
