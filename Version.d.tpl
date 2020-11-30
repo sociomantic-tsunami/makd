@@ -103,6 +103,6 @@ private void buildPredefinedVersions()
 
 private template Id (string name)
 {
-    static immutable Id = `version (` ~ name ~ `) version_info[\"ver_`
-         ~ name ~ `\"] = \"` ~ name ~ `\";`;
+    static immutable Id = `version (` ~ name ~ `) version_info["ver_`
+         ~ name ~ `"] = "` ~ name ~ `";`;
 }
